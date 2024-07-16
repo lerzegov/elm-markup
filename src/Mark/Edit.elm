@@ -30,7 +30,7 @@ Here are edits you can make against [`Mark.text`](Mark#text) and [`Mark.textWith
 
 @docs Offset
 
-@docs insertString, insertText, insertString, deleteText
+@docs insertString, insertText, deleteText
 
 @docs Styles, restyle, addStyles, removeStyles
 

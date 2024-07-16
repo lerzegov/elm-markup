@@ -12,7 +12,9 @@ module Mark.Internal.Description exposing
     , boldStyle, italicStyle, strikeStyle
     , getId, sizeFromRange
     , Record(..), Range, recordName, ParseContext(..), blockKindToContext, blockKindToSelection, length, match, matchExpected
-    , BlockOutcome, InlineSelection(..), New(..), NewInline(..), ParsedDetails, createMany, emptyRange, findMany, findMatch, lookup, matchBlock, mergeListWithAttrs, mergeWithAttrs, minusPosition, toNew, toNewText, valid
+    , BlockOutcome, InlineSelection(..), New(..), NewInline(..), ParsedDetails, createMany, emptyRange
+    , findMany, findMatch, lookup, matchBlock, mergeListWithAttrs, mergeWithAttrs, minusPosition
+    , toNew, toNewText, valid
     )
 
 {-|
@@ -39,10 +41,13 @@ module Mark.Internal.Description exposing
 
 @docs boldStyle, italicStyle, strikeStyle
 
-@docs resultToDescription, getId, sizeFromRange, foundRange
+@docs getId, sizeFromRange
 
 @docs Record, Range, recordName, ParseContext, blockKindToContext, blockKindToSelection, length, match, matchExpected
 
+@docs BlockOutcome, InlineSelection, New, NewInline, ParsedDetails, createMany, emptyRange
+@docs findMany, findMatch, lookup, matchBlock, mergeListWithAttrs, mergeWithAttrs, minusPosition, toNew, toNewText
+@docs valid
 -}
 
 import Mark.Internal.Error as Error
@@ -73,6 +78,7 @@ type Parsed
     = Parsed ParsedDetails
 
 
+{-| -}
 type alias ParsedDetails =
     { errors : List Error.Rendered
     , found : Description
@@ -149,6 +155,7 @@ type Description
     | DescribeUnexpected Id Error.UnexpectedDetails
 
 
+{-| -}
 type InlineSelection
     = EmptyAnnotation
     | SelectText (List Text)
@@ -231,6 +238,7 @@ type Block data
         }
 
 
+{-| -}
 type alias BlockOutcome data =
     Outcome Error.AstError (Uncertain (WithAttr data)) (WithAttr data)
 
@@ -248,13 +256,13 @@ type Uncertain data
     = Uncertain ( Error.UnexpectedDetails, List Error.UnexpectedDetails )
     | Recovered ( Error.UnexpectedDetails, List Error.UnexpectedDetails ) data
 
-
+{-| -}
 type ParseContext
     = ParseBlock
     | ParseInline
     | ParseInTree
 
-
+{-| -}
 type BlockKind
     = Value
     | Named String
@@ -262,6 +270,7 @@ type BlockKind
     | AnnotationNamed String
 
 
+{-| -}
 blockKindToContext : BlockKind -> ParseContext
 blockKindToContext kind =
     case kind of
@@ -278,6 +287,7 @@ blockKindToContext kind =
             ParseInline
 
 
+{-| -}
 blockKindToSelection : BlockKind -> InlineSelection
 blockKindToSelection kind =
     case kind of
@@ -294,6 +304,7 @@ blockKindToSelection kind =
             SelectText []
 
 
+{-| -}
 recordName : Description -> Maybe String
 recordName desc =
     case desc of
@@ -328,6 +339,7 @@ textLength (Text _ str) =
     String.length str
 
 
+{-| -}
 type alias Styling =
     { bold : Bool
     , italic : Bool
@@ -401,6 +413,7 @@ uncertain err =
     Almost (Uncertain ( err, [] ))
 
 
+{-| -}
 mapSuccessAndRecovered :
     (success -> otherSuccess)
     -> BlockOutcome success
@@ -452,6 +465,8 @@ type alias FieldParser =
     -> ( Id.Seed, ( String, Parser Error.Context Error.Problem ( String, Description ) ) )
 
 
+{-| -}
+emptyRange : { start : { offset : number, line : number, column : number }, end : { offset : number, line : number, column : number } }
 emptyRange =
     { start =
         { offset = 0
@@ -466,6 +481,7 @@ emptyRange =
     }
 
 
+{-| -}
 getId : Description -> Id
 getId description =
     case description of
@@ -503,12 +519,15 @@ getId description =
             Id.Id "never" []
 
 
+{-| -}
+sizeFromRange : Range -> { offset : Int, line : Int }
 sizeFromRange range =
     { offset = range.end.offset - range.start.offset
     , line = range.end.line - range.start.line
     }
 
 
+{-| -}
 renderBlock : Block data -> Description -> BlockOutcome data
 renderBlock fromBlock description =
     case description of
@@ -521,12 +540,15 @@ renderBlock fromBlock description =
                     converter description
 
 
+{-| -}
+getBlockExpectation : Block data -> Expectation
 getBlockExpectation fromBlock =
     case fromBlock of
         Block { expect } ->
             expect
 
 
+{-| -}
 blockName : Block data -> Maybe String
 blockName (Block details) =
     case details.kind of
@@ -556,6 +578,7 @@ getPosition =
         |= Parser.getPosition
 
 
+{-| -}
 getParser : ParseContext -> Id.Seed -> Block data -> ( Id.Seed, Parser Error.Context Error.Problem Description )
 getParser context seed (Block details) =
     case details.kind of
@@ -585,7 +608,7 @@ getParser context seed (Block details) =
         AnnotationNamed name ->
             details.parser context seed
 
-
+{-| -}
 getParserNoBar : ParseContext -> Id.Seed -> Block data -> ( Id.Seed, Parser Error.Context Error.Problem Description )
 getParserNoBar context seed (Block details) =
     case details.kind of
@@ -601,21 +624,24 @@ getParserNoBar context seed (Block details) =
         AnnotationNamed name ->
             details.parser context seed
 
-
+{-| -}
+emptyStyles : Styling
 emptyStyles =
     { bold = False
     , italic = False
     , strike = False
     }
 
-
+{-| -}
+boldStyle : Styling
 boldStyle =
     { bold = True
     , italic = False
     , strike = False
     }
 
-
+{-| -}
+italicStyle : Styling
 italicStyle =
     { bold = False
     , italic = True
@@ -623,13 +649,15 @@ italicStyle =
     }
 
 
+{-| -}
+strikeStyle : Styling
 strikeStyle =
     { bold = False
     , italic = False
     , strike = True
     }
 
-
+{-| -}
 inlineExample : InlineSelection -> Block a -> Maybe String
 inlineExample selection (Block details) =
     let
@@ -751,6 +779,8 @@ inlineExampleHelper kind (Block block) =
             "[" ++ selection ++ "]" ++ containerAsString
 
 
+{-| -}
+findMatch : Description -> List (Block a) -> Outcome Error.AstError (Uncertain (WithAttr a)) (WithAttr a)
 findMatch description blcks =
     case blcks of
         [] ->
@@ -764,11 +794,13 @@ findMatch description blcks =
                 findMatch description remain
 
 
+{-| -}
 matchBlock : Description -> Block a -> Bool
 matchBlock desc (Block details) =
     match desc details.expect
 
 
+{-| -}
 valid : New -> Expectation -> Bool
 valid new exp =
     case exp of
@@ -936,6 +968,7 @@ validFields expectedFields ( targetFieldName, new ) =
     List.any innerMatch expectedFields
 
 
+{-| -}
 match : Description -> Expectation -> Bool
 match description exp =
     case exp of
@@ -1165,6 +1198,8 @@ moveNewlines i pos =
     }
 
 
+{-| -}
+minusPosition : Position -> Position -> Position
 minusPosition end start =
     { offset = end.offset - start.offset
     , line = end.line - start.line
@@ -1187,7 +1222,7 @@ toString (Parsed parsed) =
         }
         |> .printed
 
-
+{-| -}
 descriptionToString : Description -> String
 descriptionToString desc =
     writeDescription
@@ -1717,6 +1752,7 @@ indentIfMultiline isMultiline cursor =
 {- CREATION -}
 
 
+{-| -}
 createInline :
     List NewInline
     -> List TextDescription
@@ -1802,6 +1838,7 @@ newInlineToText new cursor =
             }
 
 
+{-| -}
 toNew : Description -> New
 toNew desc =
     case desc of
@@ -1844,6 +1881,7 @@ toNew desc =
             NewString ""
 
 
+{-| -}
 toNewText : TextDescription -> NewInline
 toNewText textDesc =
     case textDesc of
@@ -2571,8 +2609,8 @@ render (Document blocks) ((Parsed parsedDetails) as parsed) =
                         (Error.documentMismatch
                             :: parsedDetails.errors
                         )
-
-
+{-| -}
+humanReadableExpectations : Expectation -> String
 humanReadableExpectations expect =
     case expect of
         ExpectBlock name exp ->
@@ -2609,6 +2647,8 @@ humanReadableExpectations expect =
             "A tree"
 
 
+{-| -}
+mergeWith : (success -> a -> b) -> Outcome failure (Uncertain success) success -> Outcome c (Uncertain a) a -> Outcome Error.AstError (Uncertain b) b
 mergeWith fn one two =
     case one of
         Success renderedOne ->
@@ -2650,6 +2690,8 @@ mergeWith fn one two =
                     Failure Error.NoMatch
 
 
+{-| mergeWithAttrs
+-}
 mergeWithAttrs : (one -> two -> final) -> BlockOutcome one -> BlockOutcome two -> BlockOutcome final
 mergeWithAttrs fn one two =
     case one of
@@ -2712,6 +2754,7 @@ type alias ListOutcome data =
     Outcome Error.AstError (Uncertain (List (WithAttr data))) (List (WithAttr data))
 
 
+{-| -}
 mergeListWithAttrs : (List one -> List two -> final) -> ListOutcome one -> ListOutcome two -> BlockOutcome final
 mergeListWithAttrs fn one two =
     case one of

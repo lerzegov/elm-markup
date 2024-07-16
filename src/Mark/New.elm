@@ -4,6 +4,7 @@ module Mark.New exposing
     , block, record, many
     , Text, text, unstyled, bold, italics, strike, Styles, styled
     , annotation, verbatim
+    , bullet, numbered
     )
 
 {-| Create a new `Mark.Block` that can be added to your document using `Mark.Edit.replace` or `Mark.Edit.insertAt`.
