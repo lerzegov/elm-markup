@@ -1,4 +1,5 @@
 # This is a fork created to experiment with Parser in elm-markup
+The forked version is mdgriffith/elm-markup 3.0.1
 
 # A Markup that's best friends with Elm!
 
