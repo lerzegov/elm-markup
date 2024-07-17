@@ -3,7 +3,7 @@
     "name": "lerzegov/elm-markup-fork",
     "summary": "A fork of the Elm-friendly markup language for typed data and content.",
     "license": "BSD-3-Clause",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "exposed-modules": [
         "Mark",
         "Mark.Edit",
