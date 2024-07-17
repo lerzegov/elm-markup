@@ -4,18 +4,18 @@ import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Mark
-import Mark.Edit as Edit
+import Mrk.Edit as Edit
 
 
 type alias Model =
-    { parsed : Maybe Mark.Parsed }
+    { parsed : Maybe Mrk.Parsed }
 
 
-document : Mark.Document (Html Msg)
+document : Mrk.Document (Html Msg)
 document =
-    Mark.document
+    Mrk.document
         (\html -> div [] [ html ])
-        (Mark.block "Title"
+        (Mrk.block "Title"
             (\( id, s ) ->
                 h1 [ onClick (Click id) ] [ text s ]
             )
@@ -24,14 +24,14 @@ document =
 
 
 editableText =
-    Mark.withId Tuple.pair Mark.string
+    Mrk.withId Tuple.pair Mrk.string
 
 
 initialModel : Model
 initialModel =
     { parsed =
-        case Mark.parse document "|> Title \n    some text" of
-            Mark.Success parsed ->
+        case Mrk.parse document "|> Title \n    some text" of
+            Mrk.Success parsed ->
                 Just parsed
 
             _ ->
@@ -69,8 +69,8 @@ view model =
             div [] []
 
         Just parsed ->
-            case Mark.render document parsed of
-                Mark.Success html ->
+            case Mrk.render document parsed of
+                Mrk.Success html ->
                     html
 
                 _ ->

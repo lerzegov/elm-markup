@@ -1,4 +1,4 @@
-module Mark.Internal.Index exposing
+module Mrk.Internal.Index exposing
     ( Index(..)
     , dedent
     , increment

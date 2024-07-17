@@ -1,4 +1,4 @@
-module Mark.Internal.Id exposing
+module Mrk.Internal.Id exposing
     ( Id(..)
     , Seed
     , dedent

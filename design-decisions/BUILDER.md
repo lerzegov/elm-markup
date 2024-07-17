@@ -7,7 +7,7 @@ One way to do this is to construct these new blocks manually such as:
 
 ```elm
 
-import Mark.New as New
+import Mrk.New as New
 
 myNewBlock =
     New.record "Circle"
@@ -25,7 +25,7 @@ Alternatively, I was wondering if we could build up a constructor function when 
 
 ```elm
 myBlock =
-    Mark.Edit.record3 "Circle"
+    Mrk.Edit.record3 "Circle"
         (\make x y radius -> 
             let
                 -- where we can create a new circle via `make`
@@ -38,9 +38,9 @@ myBlock =
             , radius = radius
             }
         )
-        (Mark.field "x" Mark.int)
-        (Mark.field "y" Mark.int)
-        (Mark.field "radius" Mark.int)
+        (Mrk.field "x" Mrk.int)
+        (Mrk.field "y" Mrk.int)
+        (Mrk.field "radius" Mrk.int)
 
 ```
 
@@ -57,5 +57,5 @@ type Block data
 
 But this falls apart if the data being produced is opaque like `Html msg`, because there would be no way to go from `Html msg -> String` or `Html msg -> Float`.
 
-As well, because we can put arbitrary constraints on our data via `Mark.verify`, it's likely that `data -> New` would actually have to be `data -> Maybe New`.  I.e. what happens if you have an `Int` that is now constrained to be only positive.  We now have to create a function `Int -> New`, but if it's negative it should fail.
+As well, because we can put arbitrary constraints on our data via `Mrk.verify`, it's likely that `data -> New` would actually have to be `data -> Maybe New`.  I.e. what happens if you have an `Int` that is now constrained to be only positive.  We now have to create a function `Int -> New`, but if it's negative it should fail.
 

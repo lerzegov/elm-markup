@@ -1,4 +1,4 @@
-module Mark.Error exposing
+module Mrk.Error exposing
     ( Error
     , toString, toHtml, Theme(..), toDetails, Details, Text, Range, Position
     , Custom
@@ -22,7 +22,7 @@ module Mark.Error exposing
 
 import Html
 import Html.Attributes
-import Mark.Internal.Error as Error
+import Mrk.Internal.Error as Error
 
 
 {-| -}
@@ -204,7 +204,7 @@ yellowClr theme =
             "#c4a000"
 
 
-{-| Create a custom error message to use with [`Mark.verify`](Mark#verify)
+{-| Create a custom error message to use with [`Mrk.verify`](Mark#verify)
 -}
 type alias Custom =
     { title : String

@@ -1,13 +1,13 @@
 module Main exposing (main, source, suite)
 
 import Benchmark exposing (..)
-import Benchmark.LowLevel
-import Benchmark.Runner exposing (BenchmarkProgram, program)
+import BenchMrk.LowLevel
+import BenchMrk.Runner exposing (BenchmarkProgram, program)
 import Browser
 import Html
 import Html.Attributes
 import Mark
-import Mark.Default
+import Mrk.Default
 import Task
 
 
@@ -21,7 +21,7 @@ mainManual =
         { init =
             \() ->
                 ( ( 0, "Parse Post" )
-                , Task.attempt NewResults (Benchmark.LowLevel.sample 100 (Benchmark.LowLevel.operation parsePost))
+                , Task.attempt NewResults (BenchMrk.LowLevel.sample 100 (BenchMrk.LowLevel.operation parsePost))
                 )
         , update = update
         , view = view
@@ -30,11 +30,11 @@ mainManual =
 
 
 parsePost () =
-    Mark.parse Mark.Default.document source
+    Mrk.parse Mrk.Default.document source
 
 
 type Msg
-    = NewResults (Result Benchmark.LowLevel.Error Float)
+    = NewResults (Result BenchMrk.LowLevel.Error Float)
 
 
 update msg (( count, label ) as model) =
@@ -65,7 +65,7 @@ suite =
     describe "Mark"
         [ benchmark "Parse a Simple Blogpost" <|
             \_ ->
-                Mark.parse Mark.Default.document source
+                Mrk.parse Mrk.Default.document source
         ]
 
 

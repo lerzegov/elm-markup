@@ -1,4 +1,4 @@
-module Mark.Internal.TolerantParser exposing
+module Mrk.Internal.TolerantParser exposing
     ( Parser, try
     , Token, token, keyword, symbol, OnError(..), skip, fastForwardTo, stopWith
     , succeed, ignore, keep

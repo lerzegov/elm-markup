@@ -6,11 +6,11 @@ import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Mark
-import Mark.Error
-import Mark.Internal.Description as Description
-import Mark.Internal.Id as Id
-import Mark.Internal.Parser
+import Mrk
+import Mrk.Error
+import Mrk.Internal.Description as Description
+import Mrk.Internal.Id as Id
+import Mrk.Internal.Parser
 import Parser.Advanced as Parser
 import Test exposing (..)
 
@@ -20,29 +20,29 @@ suite =
         [ test "basic" <|
             \_ ->
                 let
-                    parsed : Mark.Outcome (List Mark.Error.Error) (Mark.Partial Mark.Parsed) Mark.Parsed
+                    parsed : Mrk.Outcome (List Mrk.Error.Error) (Mrk.Partial Mrk.Parsed) Mrk.Parsed
                     parsed =
-                        Mark.parse
+                        Mrk.parse
                             document
                             elmOptimizeLevelTwoTODO
                 in
                 Expect.true
                     "Parsed successfully"
                     (isSuccessful parsed)
-        , test "Mark.toString creates a valid, pretty printed version of the source" <|
+        , test "Mrk.toString creates a valid, pretty printed version of the source" <|
             \_ ->
                 let
-                    parsed : Mark.Outcome (List Mark.Error.Error) (Mark.Partial Mark.Parsed) Mark.Parsed
+                    parsed : Mrk.Outcome (List Mrk.Error.Error) (Mrk.Partial Mrk.Parsed) Mrk.Parsed
                     parsed =
-                        Mark.parse
+                        Mrk.parse
                             document
                             elmOptimizeLevelTwoTODOTiny
 
                     stringified : String
                     stringified =
                         case parsed of
-                            Mark.Success success ->
-                                Mark.toString success
+                            Mrk.Success success ->
+                                Mrk.toString success
 
                             _ ->
                                 ""
@@ -74,7 +74,7 @@ suite =
             \_ ->
                 let
                     parsed =
-                        Mark.metadata
+                        Mrk.metadata
                             document
                             elmOptimizeLevelTwoTODO
                 in
@@ -92,7 +92,7 @@ suite =
 
 isSuccessful outcome =
     case outcome of
-        Mark.Success success ->
+        Mrk.Success success ->
             True
 
         _ ->
@@ -149,7 +149,7 @@ elmOptimizeLevelTwoTODO =
 
     -- {x} Reports results from elm-benchmark via json through a port
 
-        -- {x} Can we standardize this as a Benchmark.JsonRunner?
+        -- {x} Can we standardize this as a BenchMrk.JsonRunner?
 
 |> H2
     Benchmarks
@@ -263,7 +263,7 @@ Project →
 
 
 document =
-    Mark.documentWith
+    Mrk.documentWith
         -- (\meta body ->
         --     { metadata = meta
         --     , body =
@@ -284,11 +284,11 @@ document =
             , image
             , list
             , code
-            , Mark.map (always (Html.text "record")) (Mark.toBlock metadata)
-            , Mark.withId
+            , Mrk.map (always (Html.text "record")) (Mrk.toBlock metadata)
+            , Mrk.withId
                 (\id els ->
                     Html.p
-                        [ Attr.id (Mark.idToString id)
+                        [ Attr.id (Mrk.idToString id)
                         , Attr.class "editor-box"
                         ]
                         els
@@ -303,19 +303,19 @@ document =
 
 
 text =
-    Mark.textWith
+    Mrk.textWith
         { view =
             \styles string ->
                 viewText styles string
-        , replacements = Mark.commonReplacements
+        , replacements = Mrk.commonReplacements
         , inlines =
             [ link
             , unlinked
             , externalLink
             , droppedCapital
-            , Mark.record "x"
+            , Mrk.record "x"
                 (Html.span [] [ Html.text "[x]" ])
-            , Mark.record "_"
+            , Mrk.record "_"
                 (Html.span [] [ Html.text "[ ]" ])
             ]
         }
@@ -337,16 +337,16 @@ viewText styles string =
 
 
 externalLink =
-    Mark.annotation "link"
+    Mrk.annotation "link"
         (\id texts url ->
             Html.a [ Attr.href url ]
                 (List.map (applyTuple viewText) texts)
         )
-        |> Mark.field "url" Mark.string
+        |> Mrk.field "url" Mrk.string
 
 
 link =
-    Mark.annotation "to"
+    Mrk.annotation "to"
         (\identifier texts maybeId ->
             case maybeId of
                 Nothing ->
@@ -359,11 +359,11 @@ link =
                         ]
                         (List.map (applyTuple viewText) texts)
         )
-        |> Mark.field "id" blockId
+        |> Mrk.field "id" blockId
 
 
 unlinked =
-    Mark.annotation "unlinked"
+    Mrk.annotation "unlinked"
         (\id texts ->
             Html.span []
                 (List.map (applyTuple viewText) texts)
@@ -371,12 +371,12 @@ unlinked =
 
 
 blockId =
-    Mark.string
-        |> Mark.verify
+    Mrk.string
+        |> Mrk.verify
             (\str ->
                 Ok (Just str)
             )
-        |> Mark.onError Nothing
+        |> Mrk.onError Nothing
 
 
 illFormattedId =
@@ -392,7 +392,7 @@ applyTuple fn ( one, two ) =
 
 
 droppedCapital =
-    Mark.verbatim "drop"
+    Mrk.verbatim "drop"
         (\id str ->
             let
                 drop : String
@@ -417,7 +417,7 @@ droppedCapital =
 
 
 metadata =
-    Mark.record "Page"
+    Mrk.record "Page"
         (\author description title icon ->
             { author = author
             , description = description
@@ -425,10 +425,10 @@ metadata =
             , icon = icon
             }
         )
-        |> Mark.field "author" Mark.string
-        |> Mark.field "description" text
-        |> Mark.field "title" text
-        |> Mark.field "icon" Mark.string
+        |> Mrk.field "author" Mrk.string
+        |> Mrk.field "description" text
+        |> Mrk.field "title" text
+        |> Mrk.field "icon" Mrk.string
 
 
 
@@ -436,55 +436,55 @@ metadata =
 
 
 header =
-    Mark.withId
+    Mrk.withId
         (\id els ->
             Html.h1
-                [ Attr.id (Mark.idToString id)
+                [ Attr.id (Mrk.idToString id)
 
                 -- , Attr.class "editor-box"
                 ]
                 els
         )
-        (Mark.block "H1"
+        (Mrk.block "H1"
             identity
             text
         )
 
 
 h2 =
-    Mark.withId
+    Mrk.withId
         (\id els ->
             Html.h2
-                [ Attr.id (Mark.idToString id)
+                [ Attr.id (Mrk.idToString id)
 
                 -- , Attr.class "editor-box"
                 ]
                 els
         )
-        (Mark.block "H2"
+        (Mrk.block "H2"
             identity
             text
         )
 
 
 h3 =
-    Mark.withId
+    Mrk.withId
         (\id els ->
             Html.h3
-                [ Attr.id (Mark.idToString id)
+                [ Attr.id (Mrk.idToString id)
 
                 -- , Attr.class "editor-box"
                 ]
                 els
         )
-        (Mark.block "H3"
+        (Mrk.block "H3"
             identity
             text
         )
 
 
 image =
-    Mark.record "Image"
+    Mrk.record "Image"
         (\src description ->
             Html.img
                 [ Attr.src src
@@ -496,13 +496,13 @@ image =
                 ]
                 []
         )
-        |> Mark.field "src" Mark.string
-        |> Mark.field "description" Mark.string
-        |> Mark.toBlock
+        |> Mrk.field "src" Mrk.string
+        |> Mrk.field "description" Mrk.string
+        |> Mrk.toBlock
 
 
 code =
-    Mark.block "Code"
+    Mrk.block "Code"
         (\str ->
             Html.pre
                 [ Attr.style "padding" "12px"
@@ -510,40 +510,40 @@ code =
                 ]
                 [ Html.text str ]
         )
-        Mark.string
+        Mrk.string
 
 
 
 {- Handling bulleted and numbered lists -}
 
 
-list : Mark.Block (Html msg)
+list : Mrk.Block (Html msg)
 list =
-    Mark.tree renderList (Mark.map (Html.div []) text)
+    Mrk.tree renderList (Mrk.map (Html.div []) text)
 
 
 {-| Note: we have to define this as a separate function because
 `Enumerated` and `Item` are a pair of mutually recursive data structures.
 It's easiest to render them using two separate functions: renderList and renderItem
 -}
-renderList : Mark.Enumerated (Html msg) -> Html msg
-renderList (Mark.Enumerated enum) =
+renderList : Mrk.Enumerated (Html msg) -> Html msg
+renderList (Mrk.Enumerated enum) =
     let
         group : List (Html.Attribute msg) -> List (Html msg) -> Html msg
         group =
             case enum.icon of
-                Mark.Bullet ->
+                Mrk.Bullet ->
                     Html.ul
 
-                Mark.Number ->
+                Mrk.Number ->
                     Html.ol
     in
     group []
         (List.map renderItem enum.items)
 
 
-renderItem : Mark.Item (Html msg) -> Html msg
-renderItem (Mark.Item item) =
+renderItem : Mrk.Item (Html msg) -> Html msg
+renderItem (Mrk.Item item) =
     Html.li []
         [ Html.div [] item.content
         , renderList item.children

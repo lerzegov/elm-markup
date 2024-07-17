@@ -1,8 +1,8 @@
 module Main exposing (document, main, source)
 
 import Benchmark exposing (..)
-import Benchmark.LowLevel
-import Benchmark.Runner exposing (BenchmarkProgram, program)
+import BenchMrk.LowLevel
+import BenchMrk.Runner exposing (BenchmarkProgram, program)
 import Browser
 import Element
 import Element.Background as Background
@@ -12,14 +12,14 @@ import Element.Region
 import Html
 import Html.Attributes
 import Mark
-import Mark.Default
-import Mark.Internal
+import Mrk.Default
+import Mrk.Internal
 import Task
 
 
 type alias Model =
     { runs : List Run
-    , toRun : List ( String, Int, Benchmark.LowLevel.Operation )
+    , toRun : List ( String, Int, BenchMrk.LowLevel.Operation )
     }
 
 
@@ -28,7 +28,7 @@ type Run
 
 
 type Msg
-    = NewResults String Int (Result Benchmark.LowLevel.Error Float)
+    = NewResults String Int (Result BenchMrk.LowLevel.Error Float)
 
 
 main =
@@ -61,13 +61,13 @@ next model =
 
 
 benchmark a b c =
-    ( a, b, Benchmark.LowLevel.operation c )
+    ( a, b, BenchMrk.LowLevel.operation c )
 
 
 run ( name, number, operation ) =
     Task.attempt
         (NewResults name number)
-        (Benchmark.LowLevel.sample number operation)
+        (BenchMrk.LowLevel.sample number operation)
 
 
 update msg model =
@@ -114,23 +114,23 @@ viewResult (Run name iterations time) =
 
 
 oldParser _ =
-    Mark.parse document source
+    Mrk.parse document source
 
 
 newParser _ =
-    Mark.Internal.compile newDocument source
+    Mrk.Internal.compile newDocument source
 
 
 newParsed =
-    Mark.Internal.parse newDocument source
+    Mrk.Internal.parse newDocument source
 
 
 newConverter _ =
     case newParsed of
-        Mark.Internal.Success pars ->
+        Mrk.Internal.Success pars ->
             let
                 _ =
-                    Mark.Internal.convert newDocument pars
+                    Mrk.Internal.convert newDocument pars
             in
             Element.none
 
@@ -234,27 +234,27 @@ What does a list look like?
 
 {-| Here we define our document.
 
-This may seem a bit overwhelming, but 95% of it is copied directly from `Mark.Default.document`. You can then customize as you see fit!
+This may seem a bit overwhelming, but 95% of it is copied directly from `Mrk.Default.document`. You can then customize as you see fit!
 
 -}
 document =
     let
         defaultText =
-            Mark.Default.textWith
-                { code = Mark.Default.defaultTextStyle.code
-                , link = Mark.Default.defaultTextStyle.link
+            Mrk.Default.textWith
+                { code = Mrk.Default.defaultTextStyle.code
+                , link = Mrk.Default.defaultTextStyle.link
                 , inlines =
-                    [ Mark.inline "Drop"
+                    [ Mrk.inline "Drop"
                         (\txt model ->
                             Element.row [ Font.variant Font.smallCaps ]
-                                (List.map (\item -> Mark.Default.textFragment item model) txt)
+                                (List.map (\item -> Mrk.Default.textFragment item model) txt)
                         )
-                        |> Mark.inlineText
+                        |> Mrk.inlineText
                     ]
-                , replacements = Mark.Default.defaultTextStyle.replacements
+                , replacements = Mrk.Default.defaultTextStyle.replacements
                 }
     in
-    Mark.document
+    Mrk.document
         (\children model ->
             Element.textColumn
                 [ Element.spacing 32
@@ -264,27 +264,27 @@ document =
                 ]
                 (List.map (\v -> v model) children)
         )
-        (Mark.startWith
+        (Mrk.startWith
             (\myTitle myContent ->
                 myTitle :: myContent
             )
-            (Mark.Default.title [ Font.size 48 ] defaultText)
-            (Mark.manyOf
-                [ Mark.Default.header [ Font.size 36 ] defaultText
+            (Mrk.Default.title [ Font.size 48 ] defaultText)
+            (Mrk.manyOf
+                [ Mrk.Default.header [ Font.size 36 ] defaultText
 
-                -- , Mark.Default.list
+                -- , Mrk.Default.list
                 --     { style = \_ -> [ Element.spacing 16 ]
-                --     , icon = Mark.Default.listIcon
+                --     , icon = Mrk.Default.listIcon
                 --     }
                 --     defaultText
-                , Mark.record2 "Doodad"
+                , Mrk.record2 "Doodad"
                     (\src description model ->
                         Element.text "doodad"
                     )
-                    (Mark.field "adjustment" (Mark.intBetween 0 100))
-                    (Mark.field "pitch" (Mark.floatBetween 0 1))
-                , Mark.Default.image []
-                , Mark.Default.monospace
+                    (Mrk.field "adjustment" (Mrk.intBetween 0 100))
+                    (Mrk.field "pitch" (Mrk.floatBetween 0 1))
+                , Mrk.Default.image []
+                , Mrk.Default.monospace
                     [ Element.spacing 5
                     , Element.padding 24
                     , Background.color
@@ -301,7 +301,7 @@ document =
                     ]
 
                 -- Toplevel Text
-                , Mark.map (\viewEls model -> Element.paragraph [] (viewEls model)) defaultText
+                , Mrk.map (\viewEls model -> Element.paragraph [] (viewEls model)) defaultText
                 ]
             )
         )
@@ -312,46 +312,46 @@ document =
 
 
 
--- textFragment : Mark.Internal.Text -> model -> Element.Element msg
+-- textFragment : Mrk.Internal.Text -> model -> Element.Element msg
 
 
 textFragment _ node model_ =
     case node of
-        Mark.Internal.Text s txt ->
+        Mrk.Internal.Text s txt ->
             Element.el (List.concatMap toStyles s) (Element.text txt)
 
 
 {-| -}
-toStyles : Mark.Internal.Style -> List (Element.Attribute msg)
+toStyles : Mrk.Internal.Style -> List (Element.Attribute msg)
 toStyles style =
     case style of
-        Mark.Internal.Bold ->
+        Mrk.Internal.Bold ->
             [ Font.bold ]
 
-        Mark.Internal.Italic ->
+        Mrk.Internal.Italic ->
             [ Font.italic ]
 
-        Mark.Internal.Strike ->
+        Mrk.Internal.Strike ->
             [ Font.strike ]
 
 
 {-| Here we define our document.
 
-This may seem a bit overwhelming, but 95% of it is copied directly from `Mark.Default.document`. You can then customize as you see fit!
+This may seem a bit overwhelming, but 95% of it is copied directly from `Mrk.Default.document`. You can then customize as you see fit!
 
 -}
 newDocument =
     let
         defaultText =
-            Mark.Internal.map
+            Mrk.Internal.map
                 (\els model ->
                     List.map (\v -> v model) els
                 )
-                (Mark.Internal.text
+                (Mrk.Internal.text
                     { error = always (\model -> Element.text "ugh")
                     , view = textFragment
                     , inlines =
-                        [-- Mark.Internal.inline "Link"
+                        [-- Mrk.Internal.inline "Link"
                          -- (\txt url model ->
                          --     Element.link [ Font.color (Element.rgb 0.8 0.8 0.9) ]
                          --         { url = url
@@ -360,8 +360,8 @@ newDocument =
                          --                 (List.map (\item -> textFragment item model) txt)
                          --         }
                          -- )
-                         -- |> Mark.Internal.inlineText
-                         -- |> Mark.Internal.inlineString "url"
+                         -- |> Mrk.Internal.inlineText
+                         -- |> Mrk.Internal.inlineString "url"
                         ]
 
                     -- [ link config.link
@@ -370,11 +370,11 @@ newDocument =
                     --     ++ config.inlines
                     , replacements = []
 
-                    -- Mark.Default.defaultTextStyle.replacements
+                    -- Mrk.Default.defaultTextStyle.replacements
                     }
                 )
     in
-    Mark.Internal.document
+    Mrk.Internal.document
         (\pos children model ->
             Element.textColumn
                 [ Element.spacing 32
@@ -384,11 +384,11 @@ newDocument =
                 ]
                 (List.map (\v -> v model) children)
         )
-        (Mark.Internal.startWith
+        (Mrk.Internal.startWith
             (\pos myTitle myContent ->
                 myTitle :: myContent
             )
-            (Mark.Internal.block "Title"
+            (Mrk.Internal.block "Title"
                 (\found model ->
                     viewOrError found <|
                         \elements ->
@@ -398,10 +398,10 @@ newDocument =
                 )
                 defaultText
             )
-            (Mark.Internal.manyOf
+            (Mrk.Internal.manyOf
                 (\_ model -> Element.text "Oh boy")
-                [ --Mark.Internal.Default.header [ Font.size 36 ] defaultText
-                  Mark.Internal.block "Header"
+                [ --Mrk.Internal.Default.header [ Font.size 36 ] defaultText
+                  Mrk.Internal.block "Header"
                     (\found model ->
                         viewOrError found <|
                             \elements ->
@@ -411,19 +411,19 @@ newDocument =
                     )
                     defaultText
 
-                -- , Mark.Internal.Default.list
+                -- , Mrk.Internal.Default.list
                 --     { style = \_ -> [ Element.spacing 16 ]
-                --     , icon = Mark.Internal.Default.listIcon
+                --     , icon = Mrk.Internal.Default.listIcon
                 --     }
                 --     defaultText
-                , Mark.Internal.record2 "Doodad"
+                , Mrk.Internal.record2 "Doodad"
                     (\pos src description model ->
                         Element.text "doodad"
                     )
                     (\_ model -> Element.text "ugh, error")
-                    (Mark.Internal.field "adjustment" (Mark.Internal.intBetween 0 100))
-                    (Mark.Internal.field "pitch" (Mark.Internal.floatBetween 0 1))
-                , Mark.Internal.record2 "Image"
+                    (Mrk.Internal.field "adjustment" (Mrk.Internal.intBetween 0 100))
+                    (Mrk.Internal.field "pitch" (Mrk.Internal.floatBetween 0 1))
+                , Mrk.Internal.record2 "Image"
                     (\pos src description model ->
                         Element.image []
                             { src = src
@@ -431,9 +431,9 @@ newDocument =
                             }
                     )
                     (\_ model -> Element.text "ugh, error")
-                    (Mark.Internal.field "src" Mark.Internal.string)
-                    (Mark.Internal.field "description" Mark.Internal.string)
-                , Mark.Internal.block "Monospace"
+                    (Mrk.Internal.field "src" Mrk.Internal.string)
+                    (Mrk.Internal.field "description" Mrk.Internal.string)
+                , Mrk.Internal.block "Monospace"
                     (\found model ->
                         viewOrError found <|
                             \string ->
@@ -457,10 +457,10 @@ newDocument =
                                     )
                                     (Element.text (String.trimRight string))
                     )
-                    Mark.Internal.multiline
+                    Mrk.Internal.multiline
 
                 -- Toplevel Text
-                , Mark.Internal.map (\viewEls model -> Element.paragraph [] (viewEls model)) defaultText
+                , Mrk.Internal.map (\viewEls model -> Element.paragraph [] (viewEls model)) defaultText
                 ]
             )
         )
@@ -468,8 +468,8 @@ newDocument =
 
 viewOrError found successView =
     case found.found of
-        Mark.Internal.Found _ x ->
+        Mrk.Internal.Found _ x ->
             successView x
 
-        Mark.Internal.Unexpected unexpected ->
+        Mrk.Internal.Unexpected unexpected ->
             Element.text "oh dang"

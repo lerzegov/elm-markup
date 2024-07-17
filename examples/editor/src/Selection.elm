@@ -17,7 +17,7 @@ module Selection exposing
 
 import Json.Decode as Decode
 import Mark
-import Mark.Edit
+import Mrk.Edit
 
 
 {-| A Layout should be an ordered list in the source order that the characters appear in the html.
@@ -27,7 +27,7 @@ type CharLayout
 
 
 type alias CharBox =
-    { id : Mark.Edit.Id
+    { id : Mrk.Edit.Id
     , offset : Offset
     , box : Box
     }
@@ -294,12 +294,12 @@ decodeCharBox =
         (Decode.field "box" decodeBox)
 
 
-decodeId : Decode.Decoder Mark.Edit.Id
+decodeId : Decode.Decoder Mrk.Edit.Id
 decodeId =
     Decode.string
         |> Decode.andThen
             (\str ->
-                case Mark.stringToId str of
+                case Mrk.stringToId str of
                     Nothing ->
                         Decode.fail "Invalid Id"
 

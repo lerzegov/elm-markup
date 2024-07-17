@@ -10,7 +10,7 @@ port module Ports exposing
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Mark
-import Mark.Edit
+import Mrk.Edit
 import Selection
 
 

@@ -4,12 +4,12 @@ module ToString exposing (edits, suite)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import Mark
-import Mark.Edit
-import Mark.Error
-import Mark.Internal.Description as Description
-import Mark.Internal.Id as Id
-import Mark.New
+import Mrk
+import Mrk.Edit
+import Mrk.Error
+import Mrk.Internal.Description as Description
+import Mrk.Internal.Id as Id
+import Mrk.New
 import Test exposing (..)
 
 
@@ -167,31 +167,31 @@ manyIndentedHellosId =
 
 
 stringText =
-    Mark.text
+    Mrk.text
         (\styles str ->
             str
         )
 
 
 manyHelloDoc =
-    Mark.document
-        [ Mark.block "Indented"
+    Mrk.document
+        [ Mrk.block "Indented"
             identity
-            (Mark.manyOf
-                [ Mark.string
+            (Mrk.manyOf
+                [ Mrk.string
                 ]
             )
         ]
 
 
 manyTextDocNoBlock =
-    Mark.document
-        [ Mark.string
+    Mrk.document
+        [ Mrk.string
         ]
 
 
 styledText =
-    Mark.document
+    Mrk.document
         [ stringText ]
 
 
@@ -218,13 +218,13 @@ edits =
             [ test "Indented - Insert at 2" <|
                 \_ ->
                     let
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
-                            Mark.Edit.update
+                            Mrk.Edit.update
                                 manyHelloDoc
-                                (Mark.Edit.insertAfter
+                                (Mrk.Edit.insertAfter
                                     (Id.Id "none" [ 0, 2 ])
-                                    [ Mark.New.string "world" ]
+                                    [ Mrk.New.string "world" ]
                                 )
                                 (Description.Parsed
                                     { errors = []
@@ -255,13 +255,13 @@ edits =
             , test "Insert at 2" <|
                 \_ ->
                     let
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
-                            Mark.Edit.update
+                            Mrk.Edit.update
                                 manyTextDocNoBlock
-                                (Mark.Edit.insertAfter
+                                (Mrk.Edit.insertAfter
                                     (Id.Id "none" [ 1, 1 ])
-                                    [ Mark.New.string "world" ]
+                                    [ Mrk.New.string "world" ]
                                 )
                                 threeHellos
                     in
@@ -270,13 +270,13 @@ edits =
             , test "Insert at 1" <|
                 \_ ->
                     let
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
-                            Mark.Edit.update
+                            Mrk.Edit.update
                                 manyTextDocNoBlock
-                                (Mark.Edit.insertAfter
+                                (Mrk.Edit.insertAfter
                                     (Id.Id "none" [ 0, 1 ])
-                                    [ Mark.New.string "world" ]
+                                    [ Mrk.New.string "world" ]
                                 )
                                 threeHellos
                     in
@@ -285,13 +285,13 @@ edits =
             , test "Insert at 3" <|
                 \_ ->
                     let
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
-                            Mark.Edit.update
+                            Mrk.Edit.update
                                 manyTextDocNoBlock
-                                (Mark.Edit.insertAfter
+                                (Mrk.Edit.insertAfter
                                     (Id.Id "none" [ 2, 1 ])
-                                    [ Mark.New.string "world" ]
+                                    [ Mrk.New.string "world" ]
                                 )
                                 threeHellos
                     in
@@ -300,11 +300,11 @@ edits =
             , test "Delete at 0" <|
                 \_ ->
                     let
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
-                            Mark.Edit.update
+                            Mrk.Edit.update
                                 manyTextDocNoBlock
-                                (Mark.Edit.delete [ Id.Id "none" [ 0, 1 ] ])
+                                (Mrk.Edit.delete [ Id.Id "none" [ 0, 1 ] ])
                                 threeHellos
                     in
                     Expect.equal (Result.map Description.toString new)
@@ -312,11 +312,11 @@ edits =
             , test "Delete at 1" <|
                 \_ ->
                     let
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
-                            Mark.Edit.update
+                            Mrk.Edit.update
                                 manyTextDocNoBlock
-                                (Mark.Edit.delete [ Id.Id "none" [ 1, 1 ] ])
+                                (Mrk.Edit.delete [ Id.Id "none" [ 1, 1 ] ])
                                 threeHellos
                     in
                     Expect.equal (Result.map Description.toString new)
@@ -324,11 +324,11 @@ edits =
             , test "Delete at 2" <|
                 \_ ->
                     let
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
-                            Mark.Edit.update
+                            Mrk.Edit.update
                                 manyTextDocNoBlock
-                                (Mark.Edit.delete [ Id.Id "none" [ 2, 1 ] ])
+                                (Mrk.Edit.delete [ Id.Id "none" [ 2, 1 ] ])
                                 threeHellos
                     in
                     Expect.equal (Result.map Description.toString new)
@@ -338,17 +338,17 @@ edits =
             [ test "Add Bold" <|
                 \_ ->
                     let
-                        parseOutcome : Mark.Outcome (List Mark.Error.Error) (Mark.Partial Mark.Parsed) Mark.Parsed
+                        parseOutcome : Mrk.Outcome (List Mrk.Error.Error) (Mrk.Partial Mrk.Parsed) Mrk.Parsed
                         parseOutcome =
-                            Mark.parse styledText "Hello World"
+                            Mrk.parse styledText "Hello World"
 
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
                             case parseOutcome of
-                                Mark.Success parsed ->
-                                    Mark.Edit.update
+                                Mrk.Success parsed ->
+                                    Mrk.Edit.update
                                         styledText
-                                        (Mark.Edit.restyle
+                                        (Mrk.Edit.restyle
                                             (Id.Id "none" [ 0, 0 ])
                                             3
                                             8
@@ -364,17 +364,17 @@ edits =
             , test "Clear Bold" <|
                 \_ ->
                     let
-                        parseOutcome : Mark.Outcome (List Mark.Error.Error) (Mark.Partial Mark.Parsed) Mark.Parsed
+                        parseOutcome : Mrk.Outcome (List Mrk.Error.Error) (Mrk.Partial Mrk.Parsed) Mrk.Parsed
                         parseOutcome =
-                            Mark.parse styledText "Hello *World*"
+                            Mrk.parse styledText "Hello *World*"
 
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
                             case parseOutcome of
-                                Mark.Success parsed ->
-                                    Mark.Edit.update
+                                Mrk.Success parsed ->
+                                    Mrk.Edit.update
                                         styledText
-                                        (Mark.Edit.restyle
+                                        (Mrk.Edit.restyle
                                             (Id.Id "none" [ 0, 0 ])
                                             3
                                             11
@@ -393,17 +393,17 @@ edits =
             , test "Clearing styles with over-sized ranges still works as you'd expect" <|
                 \_ ->
                     let
-                        parseOutcome : Mark.Outcome (List Mark.Error.Error) (Mark.Partial Mark.Parsed) Mark.Parsed
+                        parseOutcome : Mrk.Outcome (List Mrk.Error.Error) (Mrk.Partial Mrk.Parsed) Mrk.Parsed
                         parseOutcome =
-                            Mark.parse styledText "Hello *World*"
+                            Mrk.parse styledText "Hello *World*"
 
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
                             case parseOutcome of
-                                Mark.Success parsed ->
-                                    Mark.Edit.update
+                                Mrk.Success parsed ->
+                                    Mrk.Edit.update
                                         styledText
-                                        (Mark.Edit.restyle
+                                        (Mrk.Edit.restyle
                                             (Id.Id "none" [ 0, 0 ])
                                             3
                                             13
@@ -422,17 +422,17 @@ edits =
             , test "Add all styles" <|
                 \_ ->
                     let
-                        parseOutcome : Mark.Outcome (List Mark.Error.Error) (Mark.Partial Mark.Parsed) Mark.Parsed
+                        parseOutcome : Mrk.Outcome (List Mrk.Error.Error) (Mrk.Partial Mrk.Parsed) Mrk.Parsed
                         parseOutcome =
-                            Mark.parse styledText "Hello World"
+                            Mrk.parse styledText "Hello World"
 
-                        new : Result (List Mark.Error.Error) Description.Parsed
+                        new : Result (List Mrk.Error.Error) Description.Parsed
                         new =
                             case parseOutcome of
-                                Mark.Success parsed ->
-                                    Mark.Edit.update
+                                Mrk.Success parsed ->
+                                    Mrk.Edit.update
                                         styledText
-                                        (Mark.Edit.restyle
+                                        (Mrk.Edit.restyle
                                             (Id.Id "none" [ 0, 0 ])
                                             3
                                             8

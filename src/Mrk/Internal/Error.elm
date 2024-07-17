@@ -1,4 +1,4 @@
-module Mark.Internal.Error exposing
+module Mrk.Internal.Error exposing
     ( Error(..), render
     , Context(..), Problem(..), UnexpectedDetails, documentMismatch, renderParsingErrors, idNotFound
     , EditErr(..)
@@ -15,7 +15,7 @@ module Mark.Internal.Error exposing
 
 -}
 
-import Mark.Internal.Format as Format
+import Mrk.Internal.Format as Format
 import Parser.Advanced as Parser
 
 
@@ -94,7 +94,7 @@ idNotFound =
         , problem = EditingError IdNotFound
         , message =
             [ Format.text "The "
-            , Format.yellow (Format.text "Mark.Edit.Id")
+            , Format.yellow (Format.text "Mrk.Edit.Id")
             , Format.text " that you provided doesn't match any blocks in the document."
             ]
         }
@@ -113,29 +113,29 @@ invalidTextEdit =
         , message =
             [ Format.text "Text edits such as\n\n"
             , indent
-            , Format.text "Mark.Edit.insertText\n"
+            , Format.text "Mrk.Edit.insertText\n"
                 |> Format.yellow
             , indent
-            , Format.text "Mark.Edit.deleteText\n"
+            , Format.text "Mrk.Edit.deleteText\n"
                 |> Format.yellow
             , indent
-            , Format.text "Mark.Edit.restyle\n"
+            , Format.text "Mrk.Edit.restyle\n"
                 |> Format.yellow
             , indent
-            , Format.text "Mark.Edit.addStyles\n"
+            , Format.text "Mrk.Edit.addStyles\n"
                 |> Format.yellow
             , indent
-            , Format.text "Mark.Edit.removeStyles\n\n"
+            , Format.text "Mrk.Edit.removeStyles\n\n"
                 |> Format.yellow
             , Format.text "only work on "
-            , Format.text "Mark.text"
+            , Format.text "Mrk.text"
                 |> Format.yellow
             , Format.text " or "
-            , Format.text "Mark.textWith"
+            , Format.text "Mrk.textWith"
                 |> Format.yellow
             , Format.text " blocks.\n\n"
             ]
-                ++ hint "If you're trying to update a simple Mark.string, you probably want to use `Mark.Edit.replace` instead."
+                ++ hint "If you're trying to update a simple Mrk.string, you probably want to use `Mrk.Edit.replace` instead."
         }
 
 
@@ -144,11 +144,11 @@ invalidInsert =
         { title = "INVALID INSERT"
         , problem = EditingError InvalidInsert
         , message =
-            [ Format.text "Mark.Edit.insertAt"
+            [ Format.text "Mrk.Edit.insertAt"
                 |> Format.yellow
             , Format.text " is only valid for elements within a "
             , indent
-            , Format.yellow (Format.text "Mark.manyOf")
+            , Format.yellow (Format.text "Mrk.manyOf")
             ]
         }
 
@@ -158,11 +158,11 @@ invalidDelete =
         { title = "INVALID DELETE"
         , problem = EditingError InvalidInsert
         , message =
-            [ Format.text "Mark.Edit.deleteAt"
+            [ Format.text "Mrk.Edit.deleteAt"
                 |> Format.yellow
             , Format.text " is only valid for elements within a "
             , indent
-            , Format.yellow (Format.text "Mark.manyOf")
+            , Format.yellow (Format.text "Mrk.manyOf")
             ]
         }
 
@@ -177,7 +177,7 @@ documentDoesntAllow new expectations =
             , Format.yellow (Format.text new)
             , Format.text "\n\n"
             , Format.text "but the block at the provided "
-            , Format.yellow (Format.text "Mark.Edit.Id")
+            , Format.yellow (Format.text "Mrk.Edit.Id")
             , Format.text " is expecting\n\n"
             ]
                 ++ List.concatMap

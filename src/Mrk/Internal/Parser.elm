@@ -1,4 +1,4 @@
-module Mark.Internal.Parser exposing
+module Mrk.Internal.Parser exposing
     ( PreviouslyAdded(..)
     , RecordType(..)
     , Replacement(..)
@@ -29,10 +29,10 @@ module Mark.Internal.Parser exposing
 
 {-| -}
 
-import Mark.Internal.Description exposing (..)
-import Mark.Internal.Error as Error exposing (Context(..), Problem(..))
-import Mark.Internal.Id as Id exposing (..)
-import Mark.Internal.TolerantParser as Tolerant
+import Mrk.Internal.Description exposing (..)
+import Mrk.Internal.Error as Error exposing (Context(..), Problem(..))
+import Mrk.Internal.Id as Id exposing (..)
+import Mrk.Internal.TolerantParser as Tolerant
 import Parser.Advanced as Parser exposing ((|.), (|=), Parser)
 
 

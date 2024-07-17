@@ -4,10 +4,10 @@ module Parse exposing (text)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import Mark
-import Mark.Internal.Description as Description
-import Mark.Internal.Id as Id
-import Mark.Internal.Parser
+import Mrk
+import Mrk.Internal.Description as Description
+import Mrk.Internal.Id as Id
+import Mrk.Internal.Parser
 import Parser.Advanced as Parser
 import Test exposing (..)
 
@@ -31,9 +31,9 @@ dummyRange =
 
 
 styleParser =
-    Mark.Internal.Parser.styledText
+    Mrk.Internal.Parser.styledText
         { inlines =
-            [--Mark.annotation
+            [--Mrk.annotation
              -- Description.ExpectAnnotation "test"
              -- [ Description.ExpectAttrString "attr" "placeholder"
              -- ]
@@ -53,7 +53,7 @@ text =
             \_ ->
                 Expect.equal
                     (Parser.run
-                        (Mark.Internal.Parser.styledText
+                        (Mrk.Internal.Parser.styledText
                             { inlines = []
                             , replacements = []
                             }
@@ -86,7 +86,7 @@ text =
             \_ ->
                 Expect.equal
                     (Parser.run
-                        (Mark.Internal.Parser.styledText
+                        (Mrk.Internal.Parser.styledText
                             { inlines = []
                             , replacements = []
                             }
@@ -117,7 +117,7 @@ text =
             \_ ->
                 Expect.equal
                     (Parser.run
-                        (Mark.Internal.Parser.styledText
+                        (Mrk.Internal.Parser.styledText
                             { inlines = []
                             , replacements = []
                             }
@@ -156,7 +156,7 @@ text =
             \_ ->
                 Expect.equal
                     (Parser.run
-                        (Mark.Internal.Parser.styledText
+                        (Mrk.Internal.Parser.styledText
                             { inlines = []
                             , replacements = []
                             }
@@ -196,7 +196,7 @@ text =
         --     \_ ->
         --         Expect.equal
         --             (Parser.run
-        --                 (Mark.Internal.Parser.styledText
+        --                 (Mrk.Internal.Parser.styledText
         --                     { inlines =
         --                         [-- Description.ExpectToken "test"
         --                          -- []
@@ -262,7 +262,7 @@ text =
         --     \_ ->
         --         Expect.equal
         --             (Parser.run
-        --                 (Mark.Internal.Parser.styledText
+        --                 (Mrk.Internal.Parser.styledText
         --                     { inlines =
         --                         [-- Description.ExpectToken "test"
         --                          -- [ Description.ExpectAttrString "attr" "placeholder"
