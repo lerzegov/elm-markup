@@ -1,4 +1,4 @@
-module Mrk.New exposing
+module Mark.New exposing
     ( Block
     , string, int, float, bool
     , block, record, many
@@ -7,13 +7,13 @@ module Mrk.New exposing
     , bullet, numbered
     )
 
-{-| Create a new `Mrk.Block` that can be added to your document using `Mrk.Edit.replace` or `Mrk.Edit.insertAt`.
+{-| Create a new `Mark.Block` that can be added to your document using `Mark.Edit.replace` or `Mark.Edit.insertAt`.
 
 Let's say we are capturing a basic diagram in our document and we want to dynamically insert a circle.
 
 We can make a new circle by writing the following function
 
-    import Mrk.New as New
+    import Mark.New as New
 
     type alias Circle =
         { x : Int
@@ -21,7 +21,7 @@ We can make a new circle by writing the following function
         , label : String
         }
 
-    circle : Circle -> Mrk.New.Block
+    circle : Circle -> Mark.New.Block
     circle details =
         New.record "Circle"
             [ ( "label", New.string details.label )
@@ -29,7 +29,7 @@ We can make a new circle by writing the following function
             , ( "y", New.int details.y )
             ]
 
-And then insert our newly made circle using `Mrk.Edit.insertAt`.
+And then insert our newly made circle using `Mark.Edit.insertAt`.
 
 **Note:** The document will only accept edits which are valid.
 
@@ -54,9 +54,9 @@ Here's an example of creating some text.
 
     newText =
         New.text
-            [ Mrk.unstyled "Look at my "
-            , Mrk.bold "cool"
-            , Mrk.unstyled " new text!"
+            [ Mark.unstyled "Look at my "
+            , Mark.bold "cool"
+            , Mark.unstyled " new text!"
             ]
 
 @docs Text, text, unstyled, bold, italics, strike, Styles, styled
@@ -68,11 +68,11 @@ Here's an example of creating some text.
 
 -}
 
-import Mrk.Internal.Description as Desc exposing (..)
-import Mrk.Internal.Error as Error
-import Mrk.Internal.Id as Id exposing (..)
-import Mrk.Internal.Outcome as Outcome
-import Mrk.Internal.Parser as Parse
+import Mark.Internal.Description as Desc exposing (..)
+import Mark.Internal.Error as Error
+import Mark.Internal.Id as Id exposing (..)
+import Mark.Internal.Outcome as Outcome
+import Mark.Internal.Parser as Parse
 import Parser.Advanced as Parser exposing ((|.), (|=), Parser)
 
 
@@ -153,7 +153,7 @@ text =
         , text =
             [ New.unstyled "my link to the elm website!" ]
         , fields =
-            [ ( "url", Mrk.string "https://elm-lang.com" ) ]
+            [ ( "url", Mark.string "https://elm-lang.com" ) ]
         }
 
 -}

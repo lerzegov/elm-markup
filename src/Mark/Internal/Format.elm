@@ -1,4 +1,4 @@
-module Mrk.Internal.Format exposing (Text, bold, cyan, red, text, underline, yellow)
+module Mark.Internal.Format exposing (Text, bold, cyan, red, text, underline, yellow)
 
 {-| 
 @docs Text, bold, cyan, red, text, underline, yellow

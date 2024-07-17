@@ -1,4 +1,4 @@
-module Mrk.Internal.Description exposing
+module Mark.Internal.Description exposing
     ( render, compile
     , Icon(..)
     , Description(..), TextDescription(..), Text(..), Style(..)
@@ -50,10 +50,10 @@ module Mrk.Internal.Description exposing
 @docs valid
 -}
 
-import Mrk.Internal.Error as Error
-import Mrk.Internal.Format exposing (text)
-import Mrk.Internal.Id as Id exposing (..)
-import Mrk.Internal.Outcome exposing (..)
+import Mark.Internal.Error as Error
+import Mark.Internal.Format exposing (text)
+import Mark.Internal.Id as Id exposing (..)
+import Mark.Internal.Outcome exposing (..)
 import Parser.Advanced as Parser exposing ((|.), (|=), Parser)
 
 

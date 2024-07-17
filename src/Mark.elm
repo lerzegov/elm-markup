@@ -1,4 +1,4 @@
-module Mrk exposing
+module Mark exposing
     ( Document, document, documentWith
     , Block, block
     , string, int, float, bool
@@ -79,15 +79,15 @@ Along with basic [`styling`](#text) and [`replacements`](#replacement), we also 
 
 -}
 
-import Mrk.Edit
-import Mrk.Error
-import Mrk.Internal.Description as Desc exposing (..)
-import Mrk.Internal.Error as Error exposing (AstError(..), Context(..), Problem(..))
-import Mrk.Internal.Id as Id exposing (..)
-import Mrk.Internal.Index as Index
-import Mrk.Internal.Outcome as Outcome
-import Mrk.Internal.Parser as Parse
-import Mrk.New exposing (block)
+import Mark.Edit
+import Mark.Error
+import Mark.Internal.Description as Desc exposing (..)
+import Mark.Internal.Error as Error exposing (AstError(..), Context(..), Problem(..))
+import Mark.Internal.Id as Id exposing (..)
+import Mark.Internal.Index as Index
+import Mark.Internal.Outcome as Outcome
+import Mark.Internal.Parser as Parse
+import Mark.New exposing (block)
 import Parser.Advanced as Parser exposing ((|.), (|=), Parser)
 
 
@@ -107,14 +107,14 @@ toString =
 
 
 {-| -}
-parse : Document metadata data -> String -> Outcome (List Mrk.Error.Error) (Partial Parsed) Parsed
+parse : Document metadata data -> String -> Outcome (List Mark.Error.Error) (Partial Parsed) Parsed
 parse doc source =
     Desc.compile doc source
         |> moveParsedToResult
 
 
 {-| -}
-metadata : Document metadata document -> String -> Result Mrk.Error.Error metadata
+metadata : Document metadata document -> String -> Result Mark.Error.Error metadata
 metadata (Desc.Document doc) source =
     case Parser.run doc.metadata source of
         Ok parsed ->
@@ -141,7 +141,7 @@ moveParsedToResult :
             }
             data
         )
-    -> Outcome (List Mrk.Error.Error) (Partial Parsed) Parsed
+    -> Outcome (List Mark.Error.Error) (Partial Parsed) Parsed
 moveParsedToResult result =
     case result of
         Ok ( parsed, Outcome.Success success ) ->
@@ -167,14 +167,14 @@ moveParsedToResult result =
 
 
 {-| -}
-render : Document meta data -> Parsed -> Outcome (List Mrk.Error.Error) (Partial ( meta, List data )) ( meta, List data )
+render : Document meta data -> Parsed -> Outcome (List Mark.Error.Error) (Partial ( meta, List data )) ( meta, List data )
 render doc ((Parsed parsedDetails) as parsed) =
     Desc.render doc parsed
         |> rewrapOutcome
 
 
 {-| -}
-compile : Document meta data -> String -> Outcome (List Mrk.Error.Error) (Partial ( meta, List data )) ( meta, List data )
+compile : Document meta data -> String -> Outcome (List Mark.Error.Error) (Partial ( meta, List data )) ( meta, List data )
 compile doc source =
     Desc.compile doc source
         |> flattenErrors
@@ -205,7 +205,7 @@ rewrapOutcome outcome =
 
 {-| -}
 type alias Partial data =
-    { errors : List Mrk.Error.Error
+    { errors : List Mark.Error.Error
     , result : data
     }
 
@@ -308,13 +308,13 @@ type alias Range =
 
 Here's an overly simple document that captures one block, a Title, and wraps it in some `Html`
 
-    document : Mrk.Document (Html msg)
+    document : Mark.Document (Html msg)
     document =
-        Mrk.document
+        Mark.document
             (\title -> Html.main [] [ title ])
-            (Mrk.block "Title"
+            (Mark.block "Title"
                 (Html.h1 [])
-                Mrk.string
+                Mark.string
             )
 
 will parse the following markup:
@@ -404,25 +404,25 @@ createDocument toDocumentId meta child =
 
     import Mark
 
-    Mrk.documentWith
+    Mark.documentWith
         { id = \metadata -> metadata.id
         , metadata =
-            Mrk.record
+            Mark.record
                 (\id author publishedAt ->
                     { author = author
                     , publishedAt = publishedAt
                     }
                 )
-                |> Mrk.field "id" Mrk.string
-                |> Mrk.field "author" Mrk.string
-                |> Mrk.field "publishedAt" Mrk.string
+                |> Mark.field "id" Mark.string
+                |> Mark.field "author" Mark.string
+                |> Mark.field "publishedAt" Mark.string
         , blocks =
             [
 
             ]
         }
 
-**Note** - You can also specify an `id`, which is a document identifier and is included in `Mrk.Edit.Id`. This is really only necessary if you're building an editor that can edit multiple documents at once.
+**Note** - You can also specify an `id`, which is a document identifier and is included in `Mark.Edit.Id`. This is really only necessary if you're building an editor that can edit multiple documents at once.
 
 Otherwise, feel free to simple put `id = \_ -> "doc"`
 
@@ -494,30 +494,30 @@ type alias CustomError =
     }
 
 
-{-| `Mrk.verify` lets you put constraints on a block.
+{-| `Mark.verify` lets you put constraints on a block.
 
-Let's say you don't just want a `Mrk.string`, you actually want a date.
+Let's say you don't just want a `Mark.string`, you actually want a date.
 
 So, you install the [`ISO8601`](https://package.elm-lang.org/packages/rtfeldman/elm-iso8601-date-strings/latest/) and you write something that looks like:
 
     import Iso8601
     import Mark
-    import Mrk.Error
+    import Mark.Error
     import Time
 
-    date : Mrk.Block Time.Posix
+    date : Mark.Block Time.Posix
     date =
-        Mrk.verify
+        Mark.verify
             (\str ->
                 str
                     |> Iso8601.toTime
                     |> Result.mapError
                         (\_ -> illformatedDateMessage)
             )
-            Mrk.string
+            Mark.string
 
     illformatedDateMessage =
-        Mrk.Error.custom
+        Mark.Error.custom
             { title = "Bad Date"
             , message =
                 [ "I was trying to parse a date, but this format looks off.\n\n"
@@ -530,7 +530,7 @@ Now you can use `date` whever you actually want dates and the error message will
 
 More importantly, you now know if a document parses successfully, that all your dates are correctly formatted.
 
-`Mrk.verify` is a very nice way to extend your markup however you'd like.
+`Mark.verify` is a very nice way to extend your markup however you'd like.
 
 You could use it to
 
@@ -541,7 +541,7 @@ You could use it to
 How exciting! Seriously, I think this is pretty cool.
 
 -}
-verify : (a -> Result Mrk.Error.Custom b) -> Block a -> Block b
+verify : (a -> Result Mark.Error.Custom b) -> Block a -> Block b
 verify fn (Block details) =
     Block
         { kind = details.kind
@@ -627,31 +627,31 @@ verify fn (Block details) =
 
 
 {-| -}
-documentId : Mrk.Edit.Id -> String
+documentId : Mark.Edit.Id -> String
 documentId (Id.Id str _) =
     str
 
 
 {-| Look up a specific block in your document by id.
 -}
-lookup : Mrk.Edit.Id -> Document meta block -> Parsed -> Outcome (List Mrk.Error.Error) (Partial block) block
+lookup : Mark.Edit.Id -> Document meta block -> Parsed -> Outcome (List Mark.Error.Error) (Partial block) block
 lookup id doc parsed =
     Desc.lookup id doc parsed
         |> rewrapOutcome
 
 
-{-| Get an `Id` associated with a `Block`, which can be used to make updates through `Mrk.Edit`.
+{-| Get an `Id` associated with a `Block`, which can be used to make updates through `Mark.Edit`.
 
-    Mrk.withId
+    Mark.withId
         (\id str ->
             Html.span
-                [ onClick (Mrk.Edit.delete id) ]
+                [ onClick (Mark.Edit.delete id) ]
                 [ Html.text str ]
         )
-        Mrk.string
+        Mark.string
 
 -}
-withId : (Mrk.Edit.Id -> a -> b) -> Block a -> Block b
+withId : (Mark.Edit.Id -> a -> b) -> Block a -> Block b
 withId fn (Block details) =
     Block
         { kind = details.kind
@@ -670,10 +670,10 @@ withId fn (Block details) =
         }
 
 
-{-| Get an `Id` associated with a `Block`, which can be used to make updates through `Mrk.Edit`.
+{-| Get an `Id` associated with a `Block`, which can be used to make updates through `Mark.Edit`.
 
-        Mrk.string
-            |> Mrk.withAttr
+        Mark.string
+            |> Mark.withAttr
                 (\str -> ("link", str))
 
 -}
@@ -738,13 +738,13 @@ See the editor example for more details.
 **Note** be aware that the actual string format of an `Id` is an implementation detail and may change even on patch releases of a library.
 
 -}
-idToString : Mrk.Edit.Id -> String
+idToString : Mark.Edit.Id -> String
 idToString =
     Id.toString
 
 
 {-| -}
-stringToId : String -> Maybe Mrk.Edit.Id
+stringToId : String -> Maybe Mark.Edit.Id
 stringToId =
     Id.fromString
 
@@ -755,10 +755,10 @@ However sometimes we don't want the _whole document_ to be unable to render just
 
 So, we need some way to say "Hey, if you run into an issue, here's a placeholder value to use."
 
-And that's what `Mrk.onError` does.
+And that's what `Mark.onError` does.
 
-    Mrk.int
-        |> Mrk.onError 5
+    Mark.int
+        |> Mark.onError 5
 
 This means if we fail to parse an integer (let's say we added a decimal), that this block would still be renderable with a default value of `5`.
 
@@ -791,9 +791,9 @@ onError newValue (Block details) =
 
 {-| A named block.
 
-    Mrk.block "MyBlock"
+    Mark.block "MyBlock"
         Html.text
-        Mrk.string
+        Mark.string
 
 Will parse the following and render it using `Html.text`
 
@@ -1159,26 +1159,26 @@ Here's how to render the above list:
     import Mark
 
     myTree =
-        Mrk.tree "List" renderList text
+        Mark.tree "List" renderList text
 
     -- Note: we have to define this as a separate function because
     -- `Items` and `Node` are a pair of mutually recursive data structures.
     -- It's easiest to render them using two separate functions:
     -- renderList and renderItem
-    renderList (Mrk.Enumerated list) =
+    renderList (Mark.Enumerated list) =
         let
             group =
                 case list.icon of
-                    Mrk.Bullet ->
+                    Mark.Bullet ->
                         Html.ul
 
-                    Mrk.Number ->
+                    Mark.Number ->
                         Html.ol
         in
         group []
             (List.map renderItem list.items)
 
-    renderItem (Mrk.Item item) =
+    renderItem (Mark.Item item) =
         Html.li []
             [ Html.div [] item.content
             , renderList item.children
@@ -1475,9 +1475,9 @@ In `elm-markup` there are only a limited number of special characters for format
   - `*bold*` results in **bold**
   - and `~strike~` results in ~~strike~~
 
-Here's an example of how to convert markup text into `Html` using `Mrk.text`:
+Here's an example of how to convert markup text into `Html` using `Mark.text`:
 
-    Mrk.text
+    Mark.text
         (\styles string ->
             Html.span
                 [ Html.Attributes.classList
@@ -1491,7 +1491,7 @@ Here's an example of how to convert markup text into `Html` using `Mrk.text`:
 
 Though you might be thinking that `bold`, `italic`, and `strike` are not nearly enough!
 
-And you're right, this is just to get you started. Your next stop is [`Mrk.textWith`](#textWith), which is more involved to use but can represent everything you're used to having in a markup language.
+And you're right, this is just to get you started. Your next stop is [`Mark.textWith`](#textWith), which is more involved to use but can represent everything you're used to having in a markup language.
 
 **Note:** Text blocks stop when two consecutive newline characters are encountered.
 
@@ -1524,7 +1524,7 @@ type alias Offset =
 `textWith` is where a lot of things come together. Let's check out what these fields actually mean.
 
   - `view` is the function to render an individual fragment of text.
-      - This is mostly what [`Mrk.text`](#text) does, so it should seem familiar.
+      - This is mostly what [`Mark.text`](#text) does, so it should seem familiar.
   - `replacements` will replace characters before rendering.
       - For example, we can replace `...` with the real ellipses unicode character, `…`.
   - `inlines` are custom inline blocks. You can use these to render things like links or emojis :D.
@@ -1825,13 +1825,13 @@ Here is my [*cool* sentence]{link| url = website.com }.
 and rendered in elm-land via:
 
     link =
-        Mrk.annotation "link"
+        Mark.annotation "link"
             (\id styles url ->
                 Html.a
                     [ Html.Attributes.href url ]
                     (List.map renderStyles styles)
             )
-            |> Mrk.field "url" Mrk.string
+            |> Mark.field "url" Mark.string
 
 -}
 annotation : String -> (Id -> List ( Styles, String ) -> result) -> Record result
@@ -1897,7 +1897,7 @@ Just like `annotation`, a `verbatim` can have a name and attributes attached to 
 Let's say we wanted to embed an inline piece of elm code. We could write
 
     inlineElm =
-        Mrk.verbatim "elm"
+        Mark.verbatim "elm"
             (\id str ->
                 Html.span
                     [ Html.Attributes.class "elm-code" ]
@@ -1946,9 +1946,9 @@ verbatim name view =
 
 For example:
 
-    Mrk.block "Poem"
+    Mark.block "Poem"
         (\str -> str)
-        Mrk.string
+        Mark.string
 
 will capture
 
@@ -1967,7 +1967,7 @@ Where `str` in the above function will be
     He will not see me stopping here
     To watch his woods fill up with snow."""
 
-**Note** If you're looking for styled text, you probably want [`Mrk.text`](#text) or [`Mrk.textWith`](#textWith).
+**Note** If you're looking for styled text, you probably want [`Mark.text`](#text) or [`Mark.textWith`](#textWith).
 
 -}
 string : Block String
@@ -2157,7 +2157,7 @@ float =
   - `---` is replaced with an [em-dash(`—`)](https://practicaltypography.com/hyphens-and-dashes.html).
   - `<>` also known as "glue", will create a non-breaking space (`&nbsp;`). This is not for manually increasing space (sequential `<>` tokens will only render as one `&nbsp;`), but to signify that the space between two words shouldn't break when wrapping. Like glueing two words together!
 
-**Note** this is included by default in `Mrk.text`
+**Note** this is included by default in `Mark.text`
 
 -}
 commonReplacements : List Replacement
@@ -2186,7 +2186,7 @@ replacement =
 
 {-| A balanced replacement. This is used for replacing parentheses or to do auto-curly quotes.
 
-    Mrk.balanced
+    Mark.balanced
         { start = ( "\"", "“" )
         , end = ( "\"", "”" )
         }
@@ -2212,7 +2212,7 @@ type alias Record a =
 
 {-| Parse a record with any number of fields.
 
-    Mrk.record "Image"
+    Mark.record "Image"
         (\src description ->
             Html.img
                 [ Html.Attributes.src src
@@ -2220,9 +2220,9 @@ type alias Record a =
                 ]
                 []
         )
-        |> Mrk.field "src" Mrk.string
-        |> Mrk.field "description" Mrk.string
-        |> Mrk.toBlock
+        |> Mark.field "src" Mark.string
+        |> Mark.field "description" Mark.string
+        |> Mark.toBlock
 
 would parse the following markup:
 

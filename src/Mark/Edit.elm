@@ -1,4 +1,4 @@
-module Mrk.Edit exposing
+module Mark.Edit exposing
     ( update, Id, Edit
     , Offset
     , insertString, insertText, deleteText
@@ -24,9 +24,9 @@ Once you have those you can [`update`](#update) your document, which can succeed
 
 # Text Edits
 
-Here are edits you can make against [`Mrk.text`](Mark#text) and [`Mrk.textWith`](Mark#textWith) blocks.
+Here are edits you can make against [`Mark.text`](Mark#text) and [`Mark.textWith`](Mark#textWith) blocks.
 
-**Note** These edits don't apply to [`Mrk.string`](Mark#string). If you want to modify a `Mrk.string`, use [`Mrk.Edit.replace`](Mark-Edit#replace).
+**Note** These edits don't apply to [`Mark.string`](Mark#string). If you want to modify a `Mark.string`, use [`Mark.Edit.replace`](Mark-Edit#replace).
 
 @docs Offset
 
@@ -48,19 +48,19 @@ Here are edits you can make against [`Mrk.text`](Mark#text) and [`Mrk.textWith`]
 
 -}
 
-import Mrk.Error
-import Mrk.Internal.Description as Desc exposing (..)
-import Mrk.Internal.Error as Error
-import Mrk.Internal.Format as Format
-import Mrk.Internal.Id as Id exposing (..)
-import Mrk.Internal.Index as Index
-import Mrk.Internal.Outcome as Outcome
-import Mrk.Internal.Parser as Parse
-import Mrk.New
+import Mark.Error
+import Mark.Internal.Description as Desc exposing (..)
+import Mark.Internal.Error as Error
+import Mark.Internal.Format as Format
+import Mark.Internal.Id as Id exposing (..)
+import Mark.Internal.Index as Index
+import Mark.Internal.Outcome as Outcome
+import Mark.Internal.Parser as Parse
+import Mark.New
 import Parser.Advanced as Parser exposing ((|.), (|=), Parser)
 
 
-{-| Every block has an `Id`. You can retrieve the `Id` for a block using [`Mrk.withId`](Mark#withId)
+{-| Every block has an `Id`. You can retrieve the `Id` for a block using [`Mark.withId`](Mark#withId)
 -}
 type alias Id =
     Id.Id
@@ -83,23 +83,23 @@ type alias Range =
 
 {-| -}
 type Edit
-    = Replace Id Mrk.New.Block
+    = Replace Id Mark.New.Block
       -- Create an element in a ManyOf
       -- Indexes overflow, so if it's too large, it just puts it at the end.
       -- Indexes that are below 0 and clamped to 0
-    | InsertAt Id Int Mrk.New.Block
-    | InsertAfter Id (List Mrk.New.Block)
+    | InsertAt Id Int Mark.New.Block
+    | InsertAfter Id (List Mark.New.Block)
     | Delete (List Id)
       -- Text Editing
     | StyleText Id Offset Offset Restyle
     | Annotate Id Offset Offset Annotation
     | ReplaceString Id Offset Offset String
-    | ReplaceSelection Id Offset Offset (List Mrk.New.Text)
+    | ReplaceSelection Id Offset Offset (List Mark.New.Text)
 
 
 type Annotation
-    = Annotation String (List ( String, Mrk.New.Block ))
-    | Verbatim String (List ( String, Mrk.New.Block ))
+    = Annotation String (List ( String, Mark.New.Block ))
+    | Verbatim String (List ( String, Mark.New.Block ))
 
 
 {-| -}
@@ -119,14 +119,14 @@ insertString id at str =
 
 
 {-| -}
-insertText : Id -> Offset -> List Mrk.New.Text -> Edit
+insertText : Id -> Offset -> List Mark.New.Text -> Edit
 insertText id at els =
     ReplaceSelection id at at els
 
 
-{-| The `Block` mentioned here is actually a `Mrk.New.Block`. Use [`Mrk.New`](/Mark-New) to create the new block you'd like.
+{-| The `Block` mentioned here is actually a `Mark.New.Block`. Use [`Mark.New`](/Mark-New) to create the new block you'd like.
 -}
-replace : Id -> Mrk.New.Block -> Edit
+replace : Id -> Mark.New.Block -> Edit
 replace =
     Replace
 
@@ -148,9 +148,9 @@ delete =
    Though when does that come up?
    I think
 
-   {-| Insert a block at an index within a `Mrk.manyOf`.
+   {-| Insert a block at an index within a `Mark.manyOf`.
    -}
-   insertAt : Id -> Int -> Mrk.New.Block -> Edit
+   insertAt : Id -> Int -> Mark.New.Block -> Edit
    insertAt =
        InsertAt
 
@@ -162,14 +162,14 @@ delete =
 The id needed here is of the _parent_.
 
 -}
-insertFirst : Id -> Mrk.New.Block -> Edit
+insertFirst : Id -> Mark.New.Block -> Edit
 insertFirst id new =
     InsertAt id 0 new
 
 
-{-| Insert a block at an index within a `Mrk.manyOf`.
+{-| Insert a block at an index within a `Mark.manyOf`.
 -}
-insertAfter : Id -> List Mrk.New.Block -> Edit
+insertAfter : Id -> List Mark.New.Block -> Edit
 insertAfter =
     InsertAfter
 
@@ -178,16 +178,16 @@ insertAfter =
 
 Here's an example that would turn the selection into a `link`.
 
-    Mrk.Edit.annotate id
+    Mark.Edit.annotate id
         start
         end
         "link"
-        [ ( "url", Mrk.New.string "https://guide.elm-lang.org/" ) ]
+        [ ( "url", Mark.New.string "https://guide.elm-lang.org/" ) ]
 
 **Note** existing annotations within the selection are removed.
 
 -}
-annotate : Id -> Offset -> Offset -> String -> List ( String, Mrk.New.Block ) -> Edit
+annotate : Id -> Offset -> Offset -> String -> List ( String, Mark.New.Block ) -> Edit
 annotate id start end name attrs =
     Annotate id start end (Annotation name attrs)
 
@@ -197,7 +197,7 @@ annotate id start end name attrs =
 **Note** existing annotations within the selection are removed.
 
 -}
-verbatim : Id -> Offset -> Offset -> String -> List ( String, Mrk.New.Block ) -> Edit
+verbatim : Id -> Offset -> Offset -> String -> List ( String, Mark.New.Block ) -> Edit
 verbatim id start end name attrs =
     Annotate id start end (Verbatim name attrs)
 
@@ -290,7 +290,7 @@ deleteBlocks ids desc =
 
 
 {-| -}
-update : Document meta data -> Edit -> Parsed -> Result (List Mrk.Error.Error) Parsed
+update : Document meta data -> Edit -> Parsed -> Result (List Mark.Error.Error) Parsed
 update doc edit (Parsed original) =
     let
         editFn =
@@ -1548,7 +1548,7 @@ emptyRange =
 
 
 {-| -}
-copy : List Id -> Parsed -> List Mrk.New.Block
+copy : List Id -> Parsed -> List Mark.New.Block
 copy ids (Desc.Parsed parsed) =
     let
         blocks =
@@ -1558,7 +1558,7 @@ copy ids (Desc.Parsed parsed) =
 
 
 {-| -}
-copyText : Id -> Offset -> Offset -> Parsed -> List Mrk.New.Text
+copyText : Id -> Offset -> Offset -> Parsed -> List Mark.New.Text
 copyText id anchor focus (Desc.Parsed parsed) =
     let
         start =

@@ -6,7 +6,7 @@ There are a number of changes to `elm-markup` in `3.0`
 ## A move to compilation
 
 
-In 2.0 you'd parse a document using `Mrk.parse`
+In 2.0 you'd parse a document using `Mark.parse`
 
 ```elm
 parse :
@@ -41,7 +41,7 @@ render : Document data -> Parsed -> Outcome (List Error) (Partial data) data
 
 
 This allows a few cool features like
-    1. Saving the intermediate AST(`Mrk.Parsed`) that is created after a document is parsed but before it's rendered.
+    1. Saving the intermediate AST(`Mark.Parsed`) that is created after a document is parsed but before it's rendered.
        1. We can then send `Edit`s to that intermediate structure and have it update really fast(basically we skip parsing, which is generally slow).  This allows us to make cool editors really easily.
     2. Being able to render a document even if it has errors in it via `Partial`
 
@@ -108,7 +108,7 @@ Inlines moved from
 {Link| some styled text | url = elm-lang.org }
 ```
 
-to `Mrk.annotation`, which looks like this:
+to `Mark.annotation`, which looks like this:
 
 ```elm
 [some styled text]{link| url = elm-lang.org }
@@ -132,7 +132,7 @@ Third paragraph.
 
 **Verbatim Text**
 
-`Mrk.verbatim` text is new for inlines.
+`Mark.verbatim` text is new for inlines.
 
 ```
 Here is my sentence `where /some/ part is taken verbatim`
@@ -187,13 +187,13 @@ This will render a block with a certain value if it has failed in some way.
 
 ## Editing
 
-More on this once it's finished.  Suffice to say you'll be able to send updates to the `Mrk.Parsed` data structure.
+More on this once it's finished.  Suffice to say you'll be able to send updates to the `Mark.Parsed` data structure.
 
-## Mrk.andThen is removed
+## Mark.andThen is removed
 
 It's actually not possible to write because parsing and rendering are now separate.  So, we can't change parsing based on a rendered piece of data because we dont have it yet.
 
-I'm not sure there was a strong usecase for it anyway, I think we just wanted `Mrk.verify` instead.
+I'm not sure there was a strong usecase for it anyway, I think we just wanted `Mark.verify` instead.
 
 
 
@@ -208,14 +208,14 @@ This is a MAJOR change.
 
 ---- ADDED MODULES - MINOR ----
 
-    Mrk.Edit
-    Mrk.Error
-    Mrk.New
+    Mark.Edit
+    Mark.Error
+    Mark.New
 
 
 ---- REMOVED MODULES - MAJOR ----
 
-    Mrk.Default
+    Mark.Default
 
 
 ---- Mark - MAJOR ----
@@ -223,74 +223,74 @@ This is a MAJOR change.
     Added:
         type Enumerated item
             = Enumerated
-                  { icon : Mrk.Icon, items : List.List (Mrk.Item item) }
+                  { icon : Mark.Icon, items : List.List (Mark.Item item) }
         type Icon  = Bullet | Number
         type Item item
             = Item
                   { index : ( Basics.Int, List.List Basics.Int )
                   , content : List.List item
-                  , children : Mrk.Enumerated item
+                  , children : Mark.Enumerated item
                   }
         type Outcome failure almost success
             = Success success
             | Almost almost
             | Failure failure
-        type alias Block data = Mrk.Internal.Description.Block data
-        type alias Document data = Mrk.Internal.Description.Document data
-        type alias Parsed = Mrk.Internal.Description.Parsed
+        type alias Block data = Mark.Internal.Description.Block data
+        type alias Document data = Mark.Internal.Description.Document data
+        type alias Parsed = Mark.Internal.Description.Parsed
         type alias Partial data =
-            { errors : List.List Mrk.Error.Error, result : data }
-        type alias Record a = Mrk.Internal.Description.Record a
-        type alias Replacement = Mrk.Internal.Parser.Replacement
+            { errors : List.List Mark.Error.Error, result : data }
+        type alias Record a = Mark.Internal.Description.Record a
+        type alias Replacement = Mark.Internal.Parser.Replacement
         type alias Styles =
             { bold : Basics.Bool, italic : Basics.Bool, strike : Basics.Bool }
         annotation :
             String.String
-            -> (List.List ( Mrk.Styles, String.String ) -> result)
-            -> Mrk.Record result
-        commonReplacements : List.List Mrk.Replacement
+            -> (List.List ( Mark.Styles, String.String ) -> result)
+            -> Mark.Record result
+        commonReplacements : List.List Mark.Replacement
         compile :
-            Mrk.Document data
+            Mark.Document data
             -> String.String
-            -> Mrk.Outcome
-                   (List.List Mrk.Error.Error)
-                   (Mrk.Partial data)
+            -> Mark.Outcome
+                   (List.List Mark.Error.Error)
+                   (Mark.Partial data)
                    data
         documentWith :
             (metadata -> body -> document)
-            -> { metadata : Mrk.Block metadata, body : Mrk.Block body }
-            -> Mrk.Document document
-        idToString : Mrk.Edit.Id -> String.String
-        onError : a -> Mrk.Block a -> Mrk.Block a
-        record : String.String -> data -> Mrk.Record data
+            -> { metadata : Mark.Block metadata, body : Mark.Block body }
+            -> Mark.Document document
+        idToString : Mark.Edit.Id -> String.String
+        onError : a -> Mark.Block a -> Mark.Block a
+        record : String.String -> data -> Mark.Record data
         render :
-            Mrk.Document data
-            -> Mrk.Parsed
-            -> Mrk.Outcome
-                   (List.List Mrk.Error.Error)
-                   (Mrk.Partial data)
+            Mark.Document data
+            -> Mark.Parsed
+            -> Mark.Outcome
+                   (List.List Mark.Error.Error)
+                   (Mark.Partial data)
                    data
-        stringToId : String.String -> Maybe.Maybe Mrk.Edit.Id
+        stringToId : String.String -> Maybe.Maybe Mark.Edit.Id
         textWith :
-            { view : Mrk.Styles -> String.String -> rendered
-            , replacements : List.List Mrk.Replacement
-            , inlines : List.List (Mrk.Record rendered)
+            { view : Mark.Styles -> String.String -> rendered
+            , replacements : List.List Mark.Replacement
+            , inlines : List.List (Mark.Record rendered)
             }
-            -> Mrk.Block (List.List rendered)
-        toBlock : Mrk.Record a -> Mrk.Block a
-        toString : Mrk.Parsed -> String.String
+            -> Mark.Block (List.List rendered)
+        toBlock : Mark.Record a -> Mark.Block a
+        toString : Mark.Parsed -> String.String
         tree :
             String.String
-            -> (Mrk.Enumerated item -> result)
-            -> Mrk.Block item
-            -> Mrk.Block result
+            -> (Mark.Enumerated item -> result)
+            -> Mark.Block item
+            -> Mark.Block result
         verbatim :
-            String.String -> (String.String -> result) -> Mrk.Record result
+            String.String -> (String.String -> result) -> Mark.Record result
         verify :
-            (a -> Result.Result Mrk.Error.Custom b)
-            -> Mrk.Block a
-            -> Mrk.Block b
-        withId : (Mrk.Edit.Id -> a -> b) -> Mrk.Block a -> Mrk.Block b
+            (a -> Result.Result Mark.Error.Custom b)
+            -> Mark.Block a
+            -> Mark.Block b
+        withId : (Mark.Edit.Id -> a -> b) -> Mark.Block a -> Mark.Block b
 
     Removed:
         type Block data
@@ -464,21 +464,21 @@ This is a MAJOR change.
       - field : String -> Block value -> Field value
       + field :
             String.String
-            -> Mrk.Block value
-            -> Mrk.Record (value -> result)
-            -> Mrk.Record result
+            -> Mark.Block value
+            -> Mark.Record (value -> result)
+            -> Mark.Record result
 
       - parse :
             Document result
             -> String
             -> Result (List (DeadEnd Context Problem)) result
       + parse :
-            Mrk.Document data
+            Mark.Document data
             -> String.String
-            -> Mrk.Outcome
-                   (List.List Mrk.Error.Error)
-                   (Mrk.Partial Mrk.Parsed)
-                   Mrk.Parsed
+            -> Mark.Outcome
+                   (List.List Mark.Error.Error)
+                   (Mark.Partial Mark.Parsed)
+                   Mark.Parsed
 
       - text :
             { view : Text -> rendered
@@ -487,7 +487,7 @@ This is a MAJOR change.
             }
             -> Block (List rendered)
       + text :
-            (Mrk.Styles -> String.String -> text)
-            -> Mrk.Block (List.List text)
+            (Mark.Styles -> String.String -> text)
+            -> Mark.Block (List.List text)
 
 ```

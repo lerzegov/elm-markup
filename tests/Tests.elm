@@ -2,54 +2,54 @@ module Tests exposing (suite)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import Mrk
-import Mrk.Edit
-import Mrk.Internal.Description
-import Mrk.Internal.Error as Error
-import Mrk.Internal.Outcome
-import Mrk.New
+import Mark
+import Mark.Edit
+import Mark.Internal.Description
+import Mark.Internal.Error as Error
+import Mark.Internal.Outcome
+import Mark.New
 import Test exposing (..)
 
 
 text =
-    Mrk.text Tuple.pair
+    Mark.text Tuple.pair
 
 
 inlines =
-    Mrk.document
-        [ Mrk.textWith
+    Mark.document
+        [ Mark.textWith
             { view =
                 \style content ->
                     [ ( style, content ) ]
             , replacements =
-                [ Mrk.replacement "..." "…"
-                , Mrk.replacement "<>" "\u{00A0}"
-                , Mrk.replacement "---" "—"
-                , Mrk.replacement "--" "–"
-                , Mrk.replacement "//" "/"
-                , Mrk.replacement "'" "’"
-                , Mrk.balanced
+                [ Mark.replacement "..." "…"
+                , Mark.replacement "<>" "\u{00A0}"
+                , Mark.replacement "---" "—"
+                , Mark.replacement "--" "–"
+                , Mark.replacement "//" "/"
+                , Mark.replacement "'" "’"
+                , Mark.balanced
                     { start = ( "\"", "“" )
                     , end = ( "\"", "”" )
                     }
                 ]
             , inlines =
-                [ Mrk.annotation "highlight" (\id txt -> txt)
-                , Mrk.verbatim "verb" (\id str -> [ Tuple.pair emptyStyles str ])
-                , Mrk.verbatim "withColor"
+                [ Mark.annotation "highlight" (\id txt -> txt)
+                , Mark.verbatim "verb" (\id str -> [ Tuple.pair emptyStyles str ])
+                , Mark.verbatim "withColor"
                     (\id str color ->
                         [ ( emptyStyles, str ++ color )
                         ]
                     )
-                    |> Mrk.field "color" redOrBlue
+                    |> Mark.field "color" redOrBlue
                 ]
             }
         ]
 
 
 redOrBlue =
-    Mrk.string
-        |> Mrk.verify
+    Mark.string
+        |> Mark.verify
             (\str ->
                 if str == "red" || str == "blue" then
                     Ok str
@@ -65,76 +65,76 @@ redOrBlue =
 
 
 inlineMultipleVerbatim =
-    Mrk.document
-        [ Mrk.textWith
+    Mark.document
+        [ Mark.textWith
             { view =
                 \styling str ->
                     [ str ]
             , replacements =
-                [ Mrk.replacement "..." "…"
-                , Mrk.replacement "<>" "\u{00A0}"
-                , Mrk.replacement "---" "—"
-                , Mrk.replacement "--" "–"
-                , Mrk.replacement "//" "/"
-                , Mrk.replacement "'" "’"
-                , Mrk.balanced
+                [ Mark.replacement "..." "…"
+                , Mark.replacement "<>" "\u{00A0}"
+                , Mark.replacement "---" "—"
+                , Mark.replacement "--" "–"
+                , Mark.replacement "//" "/"
+                , Mark.replacement "'" "’"
+                , Mark.balanced
                     { start = ( "\"", "“" )
                     , end = ( "\"", "”" )
                     }
                 ]
             , inlines =
-                [ Mrk.annotation "highlight" (\id txts -> [ "high" ])
-                , Mrk.verbatim "verb"
+                [ Mark.annotation "highlight" (\id txts -> [ "high" ])
+                , Mark.verbatim "verb"
                     (\id str ->
                         [ str ]
                     )
-                , Mrk.verbatim "verb2"
+                , Mark.verbatim "verb2"
                     (\id str one two ->
                         [ str, one, two ]
                     )
-                    |> Mrk.field "one" Mrk.string
-                    |> Mrk.field "two" Mrk.string
+                    |> Mark.field "one" Mark.string
+                    |> Mark.field "two" Mark.string
                 ]
             }
         ]
 
 
 inlineOrder =
-    Mrk.document
-        [ Mrk.textWith
+    Mark.document
+        [ Mark.textWith
             { view = \_ _ -> Nothing
             , replacements =
-                [ Mrk.replacement "..." "…"
-                , Mrk.replacement "<>" "\u{00A0}"
-                , Mrk.replacement "---" "—"
-                , Mrk.replacement "--" "–"
-                , Mrk.replacement "//" "/"
-                , Mrk.replacement "'" "’"
-                , Mrk.balanced
+                [ Mark.replacement "..." "…"
+                , Mark.replacement "<>" "\u{00A0}"
+                , Mark.replacement "---" "—"
+                , Mark.replacement "--" "–"
+                , Mark.replacement "//" "/"
+                , Mark.replacement "'" "’"
+                , Mark.balanced
                     { start = ( "\"", "“" )
                     , end = ( "\"", "”" )
                     }
                 ]
             , inlines =
-                [ Mrk.annotation "order"
+                [ Mark.annotation "order"
                     (\id txt one two ->
                         Just ( one, two )
                     )
-                    |> Mrk.field "one" Mrk.string
-                    |> Mrk.field "two" Mrk.string
+                    |> Mark.field "one" Mark.string
+                    |> Mark.field "two" Mark.string
                 ]
             }
         ]
 
 
 withMetaData =
-    Mrk.documentWith
+    Mark.documentWith
         { id = \_ -> "none"
         , metadata =
-            Mrk.record "Meta"
+            Mark.record "Meta"
                 (\one two -> { one = one, two = two })
-                |> Mrk.field "one" Mrk.string
-                |> Mrk.field "two" Mrk.string
+                |> Mark.field "one" Mark.string
+                |> Mark.field "two" Mark.string
         , blocks =
             [ text
             ]
@@ -142,131 +142,131 @@ withMetaData =
 
 
 topLevelText =
-    Mrk.document
+    Mark.document
         [ text ]
 
 
 textDoc =
-    Mrk.document
-        [ Mrk.block "Test"
+    Mark.document
+        [ Mark.block "Test"
             identity
             text
         ]
 
 
 recordDoc =
-    Mrk.document
-        [ Mrk.record "Test"
+    Mark.document
+        [ Mark.record "Test"
             (\one two three -> { one = one, two = two, three = three })
-            |> Mrk.field "one" Mrk.string
-            |> Mrk.field "two" Mrk.string
-            |> Mrk.field "three" Mrk.string
-            |> Mrk.toBlock
+            |> Mark.field "one" Mark.string
+            |> Mark.field "two" Mark.string
+            |> Mark.field "three" Mark.string
+            |> Mark.toBlock
         ]
 
 
 recordManyTextDoc =
-    Mrk.document
-        [ Mrk.record "Test"
+    Mark.document
+        [ Mark.record "Test"
             (\one two three -> { one = one, two = two, three = three })
-            |> Mrk.field "one" Mrk.string
-            |> Mrk.field "two" Mrk.string
-            |> Mrk.field "three" (Mrk.manyOf [ text ])
-            |> Mrk.toBlock
+            |> Mark.field "one" Mark.string
+            |> Mark.field "two" Mark.string
+            |> Mark.field "three" (Mark.manyOf [ text ])
+            |> Mark.toBlock
         ]
 
 
 floatDoc =
-    Mrk.document
-        [ Mrk.record "Test"
+    Mark.document
+        [ Mark.record "Test"
             (\one two three -> { one = one, two = two, three = three })
-            |> Mrk.field "one" Mrk.float
-            |> Mrk.field "two" Mrk.float
-            |> Mrk.field "three" Mrk.float
-            |> Mrk.toBlock
+            |> Mark.field "one" Mark.float
+            |> Mark.field "two" Mark.float
+            |> Mark.field "three" Mark.float
+            |> Mark.toBlock
         ]
 
 
 codeDoc =
-    Mrk.document
-        [ Mrk.block "Monospace"
+    Mark.document
+        [ Mark.block "Monospace"
             identity
-            Mrk.string
+            Mark.string
         ]
 
 
 singleOneOf =
-    Mrk.document
-        [ Mrk.block "Monospace"
+    Mark.document
+        [ Mark.block "Monospace"
             identity
-            Mrk.string
+            Mark.string
         ]
 
 
 codeAndTextDoc =
-    Mrk.document
-        [ Mrk.block "Monospace"
+    Mark.document
+        [ Mark.block "Monospace"
             identity
-            Mrk.string
-        , Mrk.map (always "text") text
+            Mark.string
+        , Mark.map (always "text") text
         ]
 
 
 intDoc =
-    Mrk.document
-        [ Mrk.record "Test"
+    Mark.document
+        [ Mark.record "Test"
             (\one two three -> { one = one, two = two, three = three })
-            |> Mrk.field "one" Mrk.int
-            |> Mrk.field "two" Mrk.int
-            |> Mrk.field "three" Mrk.int
-            |> Mrk.toBlock
+            |> Mark.field "one" Mark.int
+            |> Mark.field "two" Mark.int
+            |> Mark.field "three" Mark.int
+            |> Mark.toBlock
         ]
 
 
 sectionDoc =
-    Mrk.document
-        [ Mrk.map (always "text") text
-        , Mrk.record "Test"
+    Mark.document
+        [ Mark.map (always "text") text
+        , Mark.record "Test"
             (\one two three -> "record:one,two,three")
-            |> Mrk.field "one" Mrk.string
-            |> Mrk.field "two" Mrk.string
-            |> Mrk.field "three" Mrk.string
-            |> Mrk.toBlock
-        , Mrk.block "Section"
+            |> Mark.field "one" Mark.string
+            |> Mark.field "two" Mark.string
+            |> Mark.field "three" Mark.string
+            |> Mark.toBlock
+        , Mark.block "Section"
             (\x -> "section:" ++ String.join "," x)
-            (Mrk.manyOf
-                [ Mrk.block "Embedded"
+            (Mark.manyOf
+                [ Mark.block "Embedded"
                     (always "embedded")
                     text
-                , Mrk.map (always "text") text
+                , Mark.map (always "text") text
                 ]
             )
         ]
 
 
-nested : Mrk.Document () (List Indexed)
+nested : Mark.Document () (List Indexed)
 nested =
-    Mrk.document
-        [ Mrk.block "Nested"
+    Mark.document
+        [ Mark.block "Nested"
             identity
-            (Mrk.tree
+            (Mark.tree
                 identity
-                (Mrk.map (always True) Mrk.int)
+                (Mark.map (always True) Mark.int)
             )
-            |> Mrk.map (renderEnumWith (renderIndex []))
+            |> Mark.map (renderEnumWith (renderIndex []))
         ]
 
 
-nestedOrdering : Mrk.Document () (List Ordered)
+nestedOrdering : Mark.Document () (List Ordered)
 nestedOrdering =
-    Mrk.document
-        [ Mrk.block "Nested"
+    Mark.document
+        [ Mark.block "Nested"
             identity
-            (Mrk.tree
+            (Mark.tree
                 identity
-                Mrk.int
+                Mark.int
             )
-            |> Mrk.map (renderEnumWith (renderContent []))
+            |> Mark.map (renderEnumWith (renderContent []))
         ]
 
 
@@ -279,52 +279,52 @@ type Ordered
 
 
 type Icons
-    = Icons Mrk.Icon (List Icons)
+    = Icons Mark.Icon (List Icons)
 
 
-renderEnumWith fn (Mrk.Enumerated enum) =
+renderEnumWith fn (Mark.Enumerated enum) =
     List.indexedMap fn enum.items
 
 
-renderEnumWithIcon fn (Mrk.Enumerated enum) =
+renderEnumWithIcon fn (Mark.Enumerated enum) =
     List.indexedMap (fn enum.icon) enum.items
 
 
-renderContent stack i (Mrk.Item item) =
+renderContent stack i (Mark.Item item) =
     Ordered item.content (renderEnumWith (renderContent (i :: stack)) item.children)
 
 
-renderIndex stack i (Mrk.Item item) =
+renderIndex stack i (Mark.Item item) =
     Indexed i (renderEnumWith (renderIndex (i :: stack)) item.children)
 
 
-renderIcon stack icon i (Mrk.Item node) =
+renderIcon stack icon i (Mark.Item node) =
     Icons icon (renderEnumWithIcon (renderIcon (i :: stack)) node.children)
 
 
-iconListDoc : Mrk.Document () (List Icons)
+iconListDoc : Mark.Document () (List Icons)
 iconListDoc =
-    Mrk.document
-        [ Mrk.block "WithIcons"
+    Mark.document
+        [ Mark.block "WithIcons"
             identity
-            (Mrk.tree
+            (Mark.tree
                 identity
-                Mrk.int
+                Mark.int
             )
-            |> Mrk.map (renderEnumWithIcon (renderIcon []))
+            |> Mark.map (renderEnumWithIcon (renderIcon []))
         ]
 
 
-nestedString : Mrk.Document () (List Icons)
+nestedString : Mark.Document () (List Icons)
 nestedString =
-    Mrk.document
-        [ Mrk.block "WithIcons"
+    Mark.document
+        [ Mark.block "WithIcons"
             identity
-            (Mrk.tree
+            (Mark.tree
                 identity
-                Mrk.string
+                Mark.string
             )
-            |> Mrk.map (renderEnumWithIcon (renderIcon []))
+            |> Mark.map (renderEnumWithIcon (renderIcon []))
         ]
 
 
@@ -423,23 +423,23 @@ emptyStyles =
 
 
 sectionWithRecordDoc =
-    Mrk.document
+    Mark.document
         [ text
-            |> Mrk.map (always "text")
-        , Mrk.record "Test"
+            |> Mark.map (always "text")
+        , Mark.record "Test"
             (\one two three -> "record:one,two,three")
-            |> Mrk.field "one" Mrk.string
-            |> Mrk.field "two" Mrk.string
-            |> Mrk.field "three" Mrk.string
-            |> Mrk.toBlock
-        , Mrk.block "Section"
+            |> Mark.field "one" Mark.string
+            |> Mark.field "two" Mark.string
+            |> Mark.field "three" Mark.string
+            |> Mark.toBlock
+        , Mark.block "Section"
             (\x -> "embedded:" ++ String.join "," x)
-            (Mrk.manyOf
-                [ Mrk.block "Embedded"
+            (Mark.manyOf
+                [ Mark.block "Embedded"
                     (always "block")
                     text
                 , text
-                    |> Mrk.map (always "text")
+                    |> Mark.map (always "text")
                 ]
             )
         ]
@@ -464,14 +464,14 @@ flattenErrors result =
 
 
 toResult doc src =
-    case flattenErrors (Mrk.Internal.Description.compile doc src) of
-        Mrk.Internal.Outcome.Success ( _, success ) ->
+    case flattenErrors (Mark.Internal.Description.compile doc src) of
+        Mark.Internal.Outcome.Success ( _, success ) ->
             Ok success
 
-        Mrk.Internal.Outcome.Failure errs ->
+        Mark.Internal.Outcome.Failure errs ->
             Err (List.map getProblem errs)
 
-        Mrk.Internal.Outcome.Almost { errors } ->
+        Mark.Internal.Outcome.Almost { errors } ->
             Err (List.map getProblem errors)
 
 
@@ -494,14 +494,14 @@ suite =
               --              , Error.Expecting "~"
               --              , Error.Expecting "*"
               --              , Error.InlineStart
-              --              , Error.UnclosedStyles [ Mrk.Italic ]
+              --              , Error.UnclosedStyles [ Mark.Italic ]
               --              ]
               --             )
               test "Single newlines are allowed in paragraphs" <|
                 \_ ->
                     Expect.equal
                         (toResult
-                            (Mrk.document [ text ])
+                            (Mark.document [ text ])
                             "Some text\nand some more text\n\n"
                         )
                         (Ok
@@ -712,17 +712,17 @@ Then some text.
                     Expect.equal
                         (toResult iconListDoc iconSetting)
                         (Ok
-                            [ [ Icons Mrk.Number
-                                    [ Icons Mrk.Bullet []
-                                    , Icons Mrk.Bullet []
-                                    , Icons Mrk.Bullet []
-                                    , Icons Mrk.Bullet
-                                        [ Icons Mrk.Number []
-                                        , Icons Mrk.Number []
+                            [ [ Icons Mark.Number
+                                    [ Icons Mark.Bullet []
+                                    , Icons Mark.Bullet []
+                                    , Icons Mark.Bullet []
+                                    , Icons Mark.Bullet
+                                        [ Icons Mark.Number []
+                                        , Icons Mark.Number []
                                         ]
                                     ]
-                              , Icons Mrk.Number [ Icons Mrk.Bullet [] ]
-                              , Icons Mrk.Number []
+                              , Icons Mark.Number [ Icons Mark.Bullet [] ]
+                              , Icons Mark.Number []
                               ]
                             ]
                         )
@@ -929,15 +929,15 @@ Finally, a sentence
             [ test "Verify an int" <|
                 \_ ->
                     Expect.equal
-                        (toResult (Mrk.document [ Mrk.int ]) "5")
+                        (toResult (Mark.document [ Mark.int ]) "5")
                         (Ok [ 5 ])
             , test "Verify a range on an int" <|
                 \_ ->
                     Expect.equal
                         (toResult
-                            (Mrk.document
-                                [ Mrk.int
-                                    |> Mrk.verify
+                            (Mark.document
+                                [ Mark.int
+                                    |> Mark.verify
                                         (\x ->
                                             Ok x
                                         )
@@ -950,9 +950,9 @@ Finally, a sentence
                 \_ ->
                     Expect.equal
                         (toResult
-                            (Mrk.document
-                                [ Mrk.int
-                                    |> Mrk.verify
+                            (Mark.document
+                                [ Mark.int
+                                    |> Mark.verify
                                         (\x ->
                                             Err
                                                 { title = "Out of range"
@@ -1167,7 +1167,7 @@ Finally, a sentence
                         , \( one, two ) ->
                             Expect.true "Record parsing success"
                                 (case one of
-                                    Mrk.Success _ ->
+                                    Mark.Success _ ->
                                         True
 
                                     _ ->
@@ -1187,7 +1187,7 @@ Finally, a sentence
                         """
                     in
                     Expect.equal (compile floatDoc doc1)
-                        (Mrk.Success [ { one = 15.25, two = -1, three = 2 } ])
+                        (Mark.Success [ { one = 15.25, two = -1, three = 2 } ])
             , test "Ints are parsed as expected" <|
                 \_ ->
                     let
@@ -1200,21 +1200,21 @@ Finally, a sentence
                         """
                     in
                     Expect.equal (compile intDoc doc1)
-                        (Mrk.Success [ { one = 15, two = -1, three = 2 } ])
+                        (Mark.Success [ { one = 15, two = -1, three = 2 } ])
             ]
         ]
 
 
 compile doc src =
-    case Mrk.compile doc src of
-        Mrk.Success ( _, data ) ->
-            Mrk.Success data
+    case Mark.compile doc src of
+        Mark.Success ( _, data ) ->
+            Mark.Success data
 
-        Mrk.Almost partial ->
-            Mrk.Almost
+        Mark.Almost partial ->
+            Mark.Almost
                 { errors = partial.errors
                 , results = Tuple.second partial.result
                 }
 
-        Mrk.Failure fail ->
-            Mrk.Failure fail
+        Mark.Failure fail ->
+            Mark.Failure fail

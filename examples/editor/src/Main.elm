@@ -12,9 +12,9 @@ import Html.Lazy
 import Http
 import Json.Decode as Decode
 import Mark
-import Mrk.Edit
-import Mrk.Error
-import Mrk.New
+import Mark.Edit
+import Mark.Error
+import Mark.New
 import Ports
 import Selection
 import Time
@@ -61,10 +61,10 @@ main =
 
 type alias Model =
     -- Instead of storing the source in our model,
-    -- we're storing `Mrk.Parsed`,
+    -- we're storing `Mark.Parsed`,
     -- which is a data structure representing the document
-    { parsed : Maybe Mrk.Parsed
-    , errors : List Mrk.Error.Error
+    { parsed : Maybe Mark.Parsed
+    , errors : List Mark.Error.Error
     , cursor : Maybe Cursor
     , characterLayout : Maybe Selection.CharLayout
 
@@ -273,10 +273,10 @@ update msg model =
                 ( Just parsed, Just (Range start middle end) ) ->
                     let
                         updatedDocument =
-                            Mrk.Edit.update document
+                            Mark.Edit.update document
                                 (case style of
                                     Normal ->
-                                        Mrk.Edit.restyle
+                                        Mark.Edit.restyle
                                             start.id
                                             start.offset
                                             end.offset
@@ -286,7 +286,7 @@ update msg model =
                                             }
 
                                     _ ->
-                                        Mrk.Edit.addStyles
+                                        Mark.Edit.addStyles
                                             start.id
                                             start.offset
                                             end.offset
@@ -344,18 +344,18 @@ update msg model =
         GotSrc result ->
             case result of
                 Ok src ->
-                    case Mrk.parse document src of
-                        Mrk.Success parsed ->
+                    case Mark.parse document src of
+                        Mark.Success parsed ->
                             ( { model
                                 | parsed = Just parsed
                               }
                             , Ports.send Ports.Rescan
                             )
 
-                        Mrk.Almost partial ->
+                        Mark.Almost partial ->
                             -- We almost made it.
                             -- This happens when there was an error,
-                            -- but `Mrk.onError` made it so the document is still renderable
+                            -- but `Mark.onError` made it so the document is still renderable
                             -- In this case, we have both the rendered document,
                             -- and the error that occurred
                             ( { model
@@ -365,7 +365,7 @@ update msg model =
                             , Ports.send Ports.Rescan
                             )
 
-                        Mrk.Failure errors ->
+                        Mark.Failure errors ->
                             ( { model | errors = errors }
                             , Cmd.none
                             )
@@ -380,31 +380,31 @@ update msg model =
 
 updateDocument :
     Selection.CharLayout
-    -> Mrk.Parsed
+    -> Mark.Parsed
     -> Cursor
     -> Key
-    -> Result (List Mrk.Error.Error) ( Cursor, Mrk.Parsed )
+    -> Result (List Mark.Error.Error) ( Cursor, Mark.Parsed )
 updateDocument charLayout parsed cursor key =
     case key of
         Character char ->
             case cursor of
                 Caret caret ->
                     -- TODO: what if offset is 0?
-                    Mrk.Edit.update document
-                        (Mrk.Edit.insertText
+                    Mark.Edit.update document
+                        (Mark.Edit.insertText
                             caret.id
                             caret.offset
-                            [ Mrk.New.unstyled (String.fromChar char) ]
+                            [ Mark.New.unstyled (String.fromChar char) ]
                         )
                         parsed
                         |> Result.map (Tuple.pair (Caret (Selection.move 1 caret)))
 
                 Range start middle end ->
-                    Mrk.Edit.update document
-                        (Mrk.Edit.insertText
+                    Mark.Edit.update document
+                        (Mark.Edit.insertText
                             start.id
                             start.offset
-                            [ Mrk.New.unstyled (String.fromChar char) ]
+                            [ Mark.New.unstyled (String.fromChar char) ]
                         )
                         parsed
                         |> Result.map (Tuple.pair (Caret (Selection.move 1 start)))
@@ -417,8 +417,8 @@ updateDocument charLayout parsed cursor key =
                         newCursor =
                             Caret (Selection.move -1 caret)
                     in
-                    Mrk.Edit.update document
-                        (Mrk.Edit.deleteText
+                    Mark.Edit.update document
+                        (Mark.Edit.deleteText
                             caret.id
                             caret.offset
                             (caret.offset - 1)
@@ -431,8 +431,8 @@ updateDocument charLayout parsed cursor key =
                         newCursor =
                             Caret (Selection.move -1 start)
                     in
-                    Mrk.Edit.update document
-                        (Mrk.Edit.deleteText
+                    Mark.Edit.update document
+                        (Mark.Edit.deleteText
                             start.id
                             start.offset
                             end.offset
@@ -503,19 +503,19 @@ viewDocument parsed =
             Html.text "Source not received yet"
 
         Just source ->
-            case Mrk.render document source of
-                Mrk.Success html ->
+            case Mark.render document source of
+                Mark.Success html ->
                     Html.div (Attr.id "root" :: editEvents) html.body
 
-                Mrk.Almost { result, errors } ->
+                Mark.Almost { result, errors } ->
                     -- This is the case where there has been an error,
-                    -- but it has been caught by `Mrk.onError` and is still rendereable.
+                    -- but it has been caught by `Mark.onError` and is still rendereable.
                     Html.div []
                         [ Html.div [] (viewErrors errors)
                         , Html.div (Attr.id "root" :: editEvents) result.body
                         ]
 
-                Mrk.Failure errors ->
+                Mark.Failure errors ->
                     Html.div []
                         (viewErrors errors)
 
@@ -624,7 +624,7 @@ viewCharBoxRight box =
 
 viewErrors errors =
     List.map
-        (Mrk.Error.toHtml Mrk.Error.Light)
+        (Mark.Error.toHtml Mark.Error.Light)
         errors
 
 
@@ -633,7 +633,7 @@ viewErrors errors =
 
 
 document =
-    Mrk.documentWith
+    Mark.documentWith
         (\meta body ->
             { metadata = meta
             , body =
@@ -644,14 +644,14 @@ document =
         -- We have some required metadata that starts our document.
         { metadata = metadata
         , body =
-            Mrk.manyOf
+            Mark.manyOf
                 [ header
                 , image
                 , list
                 , code
-                , Mrk.withId
+                , Mark.withId
                     (\id els ->
-                        Html.p [ Attr.id (Mrk.idToString id) ] els
+                        Html.p [ Attr.id (Mark.idToString id) ] els
                     )
                     text
                 ]
@@ -663,11 +663,11 @@ document =
 
 
 text =
-    Mrk.textWith
+    Mark.textWith
         { view =
             \styles string ->
                 viewText styles string
-        , replacements = Mrk.commonReplacements
+        , replacements = Mark.commonReplacements
         , inlines =
             [ viewLink
             , droppedCapital
@@ -691,12 +691,12 @@ viewText styles string =
 
 
 viewLink =
-    Mrk.annotation "link"
+    Mark.annotation "link"
         (\texts url ->
             Html.a [ Attr.href url ]
                 (List.map (applyTuple viewText) texts)
         )
-        |> Mrk.field "url" Mrk.string
+        |> Mark.field "url" Mark.string
 
 
 applyTuple fn ( one, two ) =
@@ -704,7 +704,7 @@ applyTuple fn ( one, two ) =
 
 
 droppedCapital =
-    Mrk.verbatim "drop"
+    Mark.verbatim "drop"
         (\str ->
             let
                 drop =
@@ -727,17 +727,17 @@ droppedCapital =
 
 
 metadata =
-    Mrk.record "Article"
+    Mark.record "Article"
         (\author description title ->
             { author = author
             , description = description
             , title = title
             }
         )
-        |> Mrk.field "author" Mrk.string
-        |> Mrk.field "description" text
-        |> Mrk.field "title" text
-        |> Mrk.toBlock
+        |> Mark.field "author" Mark.string
+        |> Mark.field "description" text
+        |> Mark.field "title" text
+        |> Mark.toBlock
 
 
 
@@ -745,7 +745,7 @@ metadata =
 
 
 header =
-    Mrk.block "H1"
+    Mark.block "H1"
         (\children ->
             Html.h1 []
                 children
@@ -754,7 +754,7 @@ header =
 
 
 image =
-    Mrk.record "Image"
+    Mark.record "Image"
         (\src description ->
             Html.img
                 [ Attr.src src
@@ -764,13 +764,13 @@ image =
                 ]
                 []
         )
-        |> Mrk.field "src" Mrk.string
-        |> Mrk.field "description" Mrk.string
-        |> Mrk.toBlock
+        |> Mark.field "src" Mark.string
+        |> Mark.field "description" Mark.string
+        |> Mark.toBlock
 
 
 code =
-    Mrk.block "Code"
+    Mark.block "Code"
         (\str ->
             Html.pre
                 [ Attr.style "padding" "12px"
@@ -778,39 +778,39 @@ code =
                 ]
                 [ Html.text str ]
         )
-        Mrk.string
+        Mark.string
 
 
 
 {- Handling bulleted and numbered lists -}
 
 
-list : Mrk.Block (Html msg)
+list : Mark.Block (Html msg)
 list =
-    Mrk.tree "List" renderList (Mrk.map (Html.div []) text)
+    Mark.tree "List" renderList (Mark.map (Html.div []) text)
 
 
 {-| Note: we have to define this as a separate function because
 `Enumerated` and `Item` are a pair of mutually recursive data structures.
 It's easiest to render them using two separate functions: renderList and renderItem
 -}
-renderList : Mrk.Enumerated (Html msg) -> Html msg
-renderList (Mrk.Enumerated enum) =
+renderList : Mark.Enumerated (Html msg) -> Html msg
+renderList (Mark.Enumerated enum) =
     let
         group =
             case enum.icon of
-                Mrk.Bullet ->
+                Mark.Bullet ->
                     Html.ul
 
-                Mrk.Number ->
+                Mark.Number ->
                     Html.ol
     in
     group []
         (List.map renderItem enum.items)
 
 
-renderItem : Mrk.Item (Html msg) -> Html msg
-renderItem (Mrk.Item item) =
+renderItem : Mark.Item (Html msg) -> Html msg
+renderItem (Mark.Item item) =
     Html.li []
         [ Html.div [] item.content
         , renderList item.children

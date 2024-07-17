@@ -11,7 +11,7 @@ import Html exposing (Html)
 import Html.Attributes as Attr
 import Http
 import Mark
-import Mrk.Error
+import Mark.Error
 
 
 main =
@@ -67,19 +67,19 @@ view model =
                 Html.text "Source not received yet"
 
             Just source ->
-                case Mrk.compile document source of
-                    Mrk.Success html ->
+                case Mark.compile document source of
+                    Mark.Success html ->
                         Html.div [] html.body
 
-                    Mrk.Almost { result, errors } ->
+                    Mark.Almost { result, errors } ->
                         -- This is the case where there has been an error,
-                        -- but it has been caught by `Mrk.onError` and is still rendereable.
+                        -- but it has been caught by `Mark.onError` and is still rendereable.
                         Html.div []
                             [ Html.div [] (viewErrors errors)
                             , Html.div [] result.body
                             ]
 
-                    Mrk.Failure errors ->
+                    Mark.Failure errors ->
                         Html.div []
                             (viewErrors errors)
         ]
@@ -88,7 +88,7 @@ view model =
 
 viewErrors errors =
     List.map
-        (Mrk.Error.toHtml Mrk.Error.Light)
+        (Mark.Error.toHtml Mark.Error.Light)
         errors
 
 
@@ -127,7 +127,7 @@ body {
 
 
 document =
-    Mrk.documentWith
+    Mark.documentWith
         (\meta body ->
             { metadata = meta
             , body =
@@ -139,12 +139,12 @@ document =
         -- We have some required metadata that starts our document.
         { metadata = metadata
         , body =
-            Mrk.manyOf
+            Mark.manyOf
                 [ header
                 , image
                 , list
                 , code
-                , Mrk.map (Html.p []) text
+                , Mark.map (Html.p []) text
                 ]
         }
 
@@ -154,18 +154,18 @@ document =
 
 
 text =
-    Mrk.textWith
+    Mark.textWith
         { view =
             \styles string ->
                 viewText styles string
-        , replacements = Mrk.commonReplacements
+        , replacements = Mark.commonReplacements
         , inlines =
-            [ Mrk.annotation "link"
+            [ Mark.annotation "link"
                 (\texts url ->
                     Html.a [ Attr.href url ] (List.map (applyTuple viewText) texts)
                 )
-                |> Mrk.field "url" Mrk.string
-            , Mrk.verbatim "drop"
+                |> Mark.field "url" Mark.string
+            , Mark.verbatim "drop"
                 (\str ->
                     let
                         drop =
@@ -209,17 +209,17 @@ viewText styles string =
 
 
 metadata =
-    Mrk.record "Article"
+    Mark.record "Article"
         (\author description title ->
             { author = author
             , description = description
             , title = title
             }
         )
-        |> Mrk.field "author" Mrk.string
-        |> Mrk.field "description" text
-        |> Mrk.field "title" text
-        |> Mrk.toBlock
+        |> Mark.field "author" Mark.string
+        |> Mark.field "description" text
+        |> Mark.field "title" text
+        |> Mark.toBlock
 
 
 
@@ -227,7 +227,7 @@ metadata =
 
 
 header =
-    Mrk.block "H1"
+    Mark.block "H1"
         (\children ->
             Html.h1 []
                 children
@@ -236,7 +236,7 @@ header =
 
 
 image =
-    Mrk.record "Image"
+    Mark.record "Image"
         (\src description ->
             Html.img
                 [ Attr.src src
@@ -246,13 +246,13 @@ image =
                 ]
                 []
         )
-        |> Mrk.field "src" Mrk.string
-        |> Mrk.field "description" Mrk.string
-        |> Mrk.toBlock
+        |> Mark.field "src" Mark.string
+        |> Mark.field "description" Mark.string
+        |> Mark.toBlock
 
 
 code =
-    Mrk.block "Code"
+    Mark.block "Code"
         (\str ->
             Html.pre
                 [ Attr.style "padding" "12px"
@@ -260,16 +260,16 @@ code =
                 ]
                 [ Html.text str ]
         )
-        Mrk.string
+        Mark.string
 
 
 
 {- Handling bulleted and numbered lists -}
 
 
-list : Mrk.Block (Html msg)
+list : Mark.Block (Html msg)
 list =
-    Mrk.tree "List" renderList (Mrk.map (Html.div []) text)
+    Mark.tree "List" renderList (Mark.map (Html.div []) text)
 
 
 
@@ -279,23 +279,23 @@ list =
 -- renderList and renderItem
 
 
-renderList : Mrk.Enumerated (Html msg) -> Html msg
-renderList (Mrk.Enumerated enum) =
+renderList : Mark.Enumerated (Html msg) -> Html msg
+renderList (Mark.Enumerated enum) =
     let
         group =
             case enum.icon of
-                Mrk.Bullet ->
+                Mark.Bullet ->
                     Html.ul
 
-                Mrk.Number ->
+                Mark.Number ->
                     Html.ol
     in
     group []
         (List.map renderItem enum.items)
 
 
-renderItem : Mrk.Item (Html msg) -> Html msg
-renderItem (Mrk.Item item) =
+renderItem : Mark.Item (Html msg) -> Html msg
+renderItem (Mark.Item item) =
     Html.li []
         [ Html.div [] item.content
         , renderList item.children

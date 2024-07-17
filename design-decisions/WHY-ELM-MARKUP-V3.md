@@ -27,8 +27,8 @@ Because we know the structure that the document should be, we can get nice Elm-e
 
 Beyond this, I wanted some other capabilities I didn't usually associate with a markup language:
 
-- To parse your markup into an intermediate data structure called a `Mrk.Parsed` (basically an [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree))
-- Make edits to `Parsed` through `Mrk.Edit.update`.  (They will be checked to ensure they are valid edits)
+- To parse your markup into an intermediate data structure called a `Mark.Parsed` (basically an [AST](https://en.wikipedia.org/wiki/Abstract_syntax_tree))
+- Make edits to `Parsed` through `Mark.Edit.update`.  (They will be checked to ensure they are valid edits)
 - Render that `Parsed` into your result.
 - Convert `Parsed` back into an elm-markup source.
 
@@ -38,7 +38,7 @@ This goes back to reason `2.` that I was making this, which is that many game en
 
 And because apparently I go nuts when I do a project, I also created
 
-- An [Elm Markup CLI](https://github.com/mdgriffith/elm-markup-cli) which will check your markup source files (*.emu) for errors using any exposing `Mrk.Document`s in your elm project.
+- An [Elm Markup CLI](https://github.com/mdgriffith/elm-markup-cli) which will check your markup source files (*.emu) for errors using any exposing `Mark.Document`s in your elm project.
 - A [VS Code Extension](https://marketplace.visualstudio.com/items?itemName=mdgriffith.elm-markup-vscode) with syntax highlighting and error reporting based on the output of the CLI.
 
 If your interested in getting started, [checkout the examples](https://github.com/mdgriffith/elm-markup/tree/master/examples)

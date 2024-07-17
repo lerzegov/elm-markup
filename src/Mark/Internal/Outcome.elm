@@ -1,4 +1,4 @@
-module Mrk.Internal.Outcome exposing
+module Mark.Internal.Outcome exposing
     ( Outcome(..)
     , mapSuccess
     )

@@ -4,73 +4,73 @@ module Ids exposing (..)
 
 import Expect exposing (Expectation)
 import Fuzz exposing (Fuzzer, int, list, string)
-import Mrk
-import Mrk.Edit
-import Mrk.Internal.Description as Description
-import Mrk.Internal.Error as Error
-import Mrk.Internal.Id as Id
-import Mrk.New
+import Mark
+import Mark.Edit
+import Mark.Internal.Description as Description
+import Mark.Internal.Error as Error
+import Mark.Internal.Id as Id
+import Mark.New
 import Test exposing (..)
 
 
 sectionDoc =
-    Mrk.document
-        [ Mrk.withId (\i b -> [ Tuple.pair i b ]) <|
-            Mrk.map (String.join ":" << List.map Tuple.second) text
+    Mark.document
+        [ Mark.withId (\i b -> [ Tuple.pair i b ]) <|
+            Mark.map (String.join ":" << List.map Tuple.second) text
         , idRecord
-        , Mrk.withId
+        , Mark.withId
             (\x y ->
                 ( x, "section block" ) :: y
             )
           <|
-            Mrk.block "Section"
+            Mark.block "Section"
                 List.concat
-                (Mrk.manyOf
-                    [ Mrk.withId
+                (Mark.manyOf
+                    [ Mark.withId
                         (\x y ->
                             ( x, "embedded block" ) :: y
                         )
                       <|
-                        Mrk.block "Embedded"
+                        Mark.block "Embedded"
                             identity
-                            (Mrk.withId (\i b -> [ Tuple.pair i ("!!" ++ b) ]) <|
-                                Mrk.map (String.join ":" << List.map Tuple.second) text
+                            (Mark.withId (\i b -> [ Tuple.pair i ("!!" ++ b) ]) <|
+                                Mark.map (String.join ":" << List.map Tuple.second) text
                             )
-                    , Mrk.withId (\i b -> [ Tuple.pair i b ]) <|
-                        Mrk.map (String.join ":" << List.map Tuple.second) text
+                    , Mark.withId (\i b -> [ Tuple.pair i b ]) <|
+                        Mark.map (String.join ":" << List.map Tuple.second) text
                     ]
                 )
-        , Mrk.withId
+        , Mark.withId
             (\x y -> ( x, "list block" ) :: y)
             list
         ]
 
 
 idRecord =
-    Mrk.withId
+    Mark.withId
         (\i b -> ( i, "record main!" ) :: b)
-        (Mrk.record "Test"
+        (Mark.record "Test"
             (\one two three ->
                 [ one
                 , two
                 , three
                 ]
             )
-            |> Mrk.field "one" (Mrk.withId Tuple.pair Mrk.string)
-            |> Mrk.field "two" (Mrk.withId Tuple.pair Mrk.string)
-            |> Mrk.field "three" (Mrk.withId Tuple.pair Mrk.string)
-            |> Mrk.toBlock
+            |> Mark.field "one" (Mark.withId Tuple.pair Mark.string)
+            |> Mark.field "two" (Mark.withId Tuple.pair Mark.string)
+            |> Mark.field "three" (Mark.withId Tuple.pair Mark.string)
+            |> Mark.toBlock
         )
 
 
-list : Mrk.Block (List ( Id.Id, String ))
+list : Mark.Block (List ( Id.Id, String ))
 list =
-    Mrk.block "List"
+    Mark.block "List"
         identity
-        (Mrk.tree
+        (Mark.tree
             renderList
-            (Mrk.withId (\i b -> [ Tuple.pair i b ]) <|
-                Mrk.map (String.join "--" << List.map Tuple.second) text
+            (Mark.withId (\i b -> [ Tuple.pair i b ]) <|
+                Mark.map (String.join "--" << List.map Tuple.second) text
             )
         )
 
@@ -79,15 +79,15 @@ list =
 `Enumerated` and `Item` are a pair of mutually recursive data structures.
 It's easiest to render them using two separate functions: renderList and renderItem
 -}
-renderList : Mrk.Enumerated (List ( Id.Id, String )) -> List ( Id.Id, String )
-renderList (Mrk.Enumerated enum) =
+renderList : Mark.Enumerated (List ( Id.Id, String )) -> List ( Id.Id, String )
+renderList (Mark.Enumerated enum) =
     List.concatMap renderItem enum.items
 
 
-renderItem : Mrk.Item (List ( Id.Id, String )) -> List ( Id.Id, String )
-renderItem (Mrk.Item item) =
+renderItem : Mark.Item (List ( Id.Id, String )) -> List ( Id.Id, String )
+renderItem (Mark.Item item) =
     case item.children of
-        Mrk.Enumerated enum ->
+        Mark.Enumerated enum ->
             case enum.items of
                 [] ->
                     List.concat item.content
@@ -97,7 +97,7 @@ renderItem (Mrk.Item item) =
 
 
 text =
-    Mrk.text Tuple.pair
+    Mark.text Tuple.pair
 
 
 doc1 =
@@ -179,14 +179,14 @@ getProblem renderedError =
 
 
 toResult doc src =
-    case Mrk.compile doc src of
-        Mrk.Success ( _, success ) ->
+    case Mark.compile doc src of
+        Mark.Success ( _, success ) ->
             Ok success
 
-        Mrk.Failure errs ->
+        Mark.Failure errs ->
             Err (List.map getProblem errs)
 
-        Mrk.Almost { errors } ->
+        Mark.Almost { errors } ->
             Err (List.map getProblem errors)
 
 
@@ -205,7 +205,7 @@ suite =
                     Ok data ->
                         let
                             stringIds =
-                                List.concatMap (List.map (Mrk.idToString << Tuple.first)) data
+                                List.concatMap (List.map (Mark.idToString << Tuple.first)) data
 
                             -- _ =
                             --     List.map (Debug.log "ids") data

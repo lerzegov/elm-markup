@@ -10,9 +10,9 @@ elm-live src/Main.elm --open --start-page=editor.html -- --output=assets/editor.
 
 But! The exciting part of this example is that it shows how to build a basic web-editor for your document.
 
-To do this we're going to be using `Mrk.Edit` and `Mrk.New`.
+To do this we're going to be using `Mark.Edit` and `Mark.New`.
 
-The first thing to look at is `Mrk.Edit.update`, which will attempt to update the document based on an edit you might have.
+The first thing to look at is `Mark.Edit.update`, which will attempt to update the document based on an edit you might have.
 
 
 ## Getting Oriented
@@ -21,7 +21,7 @@ There's a lot going on in this example, but I think there are really only two ne
 
 1. We manage the `Selection` entirely in Elm and only rely on the browser for character positions via `Selection.CharacterLayout`.
     - Oh boy, I tried a lot of other ways before landing on this one. Probably needs a blog post.
-2. `Mrk.Edit.update` updates our document if the edit is valid.
+2. `Mark.Edit.update` updates our document if the edit is valid.
 
 
 ## Improvements
@@ -42,8 +42,8 @@ I've tried ranking the estimated difficulty.
 5. `involved` - consider adopting an incremental strategy for rescanning the document (`Ports.send Ports.Rescan`).  Depends on `4.`
    - Just rescan what's needed.
    - Incrementally update `model.characterLayout`.
-6. `?` - Expand the UI of the editor to allow inserting `Mrk.Block`s, such as images. 
-7. `?` - Use more `Html.Lazy` in document rendering if possible.  `Mrk.Parsed` might make that a bit difficult, so we'll need to double check that we're getting the benefit beyond just sprinkling lazy everywhere.
+6. `?` - Expand the UI of the editor to allow inserting `Mark.Block`s, such as images. 
+7. `?` - Use more `Html.Lazy` in document rendering if possible.  `Mark.Parsed` might make that a bit difficult, so we'll need to double check that we're getting the benefit beyond just sprinkling lazy everywhere.
 
 
 I'm sure there's a bunch of other stuff.
