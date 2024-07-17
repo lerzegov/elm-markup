@@ -27,7 +27,34 @@ module Mrk.Internal.Parser exposing
     , word
     )
 
-{-| -}
+{-| 
+@docs PreviouslyAdded
+    , RecordType
+    , Replacement
+    , backtrackCharacters
+    , float
+    , fullTree
+    , getFailableBlock
+    , getPosition
+    , getRangeAndSource
+    , iconParser
+    , indentationString
+    , indentedString
+    , int
+    , manyOf
+    , newline
+    , newlineWith
+    , oneOf
+    , peek
+    , raggedIndentedStringAbove
+    , record
+    , skipBlankLineWith
+    , styledText
+    , withIndent
+    , withRange
+    , withRangeResult
+    , word
+-}
 
 import Mrk.Internal.Description exposing (..)
 import Mrk.Internal.Error as Error exposing (Context(..), Problem(..))
@@ -36,10 +63,13 @@ import Mrk.Internal.TolerantParser as Tolerant
 import Parser.Advanced as Parser exposing ((|.), (|=), Parser)
 
 
+{-| -}
+newlineWith : String -> Parser c Problem ()
 newlineWith x =
     Parser.token (Parser.Token "\n" (Expecting x))
 
-
+{-| -}
+newline : Parser c Problem ()
 newline =
     Parser.token (Parser.Token "\n" Newline)
 
@@ -59,6 +89,7 @@ type alias Range =
     }
 
 
+{-| -}
 int : Id -> Parser Context Problem Description
 int id =
     Parser.map
@@ -81,6 +112,8 @@ int id =
         )
 
 
+{-| -}
+integer : Parser Context Problem (Result Problem Int)
 integer =
     Parser.oneOf
         [ Parser.succeed
@@ -133,6 +166,8 @@ float id =
         )
 
 
+{-| -}
+floating : Parser Context Problem (Result Problem ( String, Float ))
 floating =
     Parser.oneOf
         [ Parser.succeed
@@ -272,6 +307,8 @@ indentationBetween lower higher =
         )
 
 
+{-| -}
+oneOf : List (Block data) -> List Expectation -> ParseContext -> Seed -> ( Seed, Parser Context Problem Description )
 oneOf blocks expectations context seed =
     let
         children =
@@ -302,7 +339,8 @@ oneOf blocks expectations context seed =
         )
     )
 
-
+{-| -}
+gatherParsers : ParseContext -> Block data -> { a | seed : Seed, blockNames : List String, childBlocks : List (Parser Context Problem Description), childValues : List (Parser Context Problem Description) } -> { blockNames : List String, childBlocks : List (Parser Context Problem Description), childValues : List (Parser Context Problem Description), seed : Seed }
 gatherParsers context =
     \myBlock details ->
         let
@@ -325,6 +363,7 @@ gatherParsers context =
                 }
 
 
+{-| -}
 unexpectedInOneOf :
     Id
     -> List Expectation
@@ -343,6 +382,7 @@ unexpectedInOneOf id expectations =
         )
 
 
+{-| -}
 getFailableBlock :
     ParseContext
     -> Seed
@@ -384,6 +424,7 @@ getFailableBlock context seed (Block details) =
     - Parse a `|`, fail to parse the rest and return an Error
 
 -}
+failableBlocks : Id -> { a | parsers : List (Parser Context Problem Description), names : List String } -> Parser Context Problem Description
 failableBlocks id blocks =
     Parser.succeed identity
         |. Parser.token (Parser.Token "|>" BlockStart)
@@ -434,6 +475,8 @@ type Replacement
         }
 
 
+{-| -}
+textCursor : Styling -> Position -> Seed -> TextCursor
 textCursor inheritedStyles startingPos seed =
     TextCursor
         { current = Text inheritedStyles ""
@@ -444,6 +487,7 @@ textCursor inheritedStyles startingPos seed =
         }
 
 
+{-| -}
 styledText :
     { inlines : List (Block a)
     , replacements : List Replacement
@@ -486,6 +530,7 @@ styledText options context seed startingPos inheritedStyles =
         ]
 
 
+{-| -}
 textJustStarted : TextCursor -> Bool
 textJustStarted (TextCursor details) =
     case details.found of
@@ -501,6 +546,8 @@ textJustStarted (TextCursor details) =
             False
 
 
+{-| -}
+styleChar : Style -> String
 styleChar style =
     case style of
         Italic ->
@@ -513,6 +560,8 @@ styleChar style =
             "~"
 
 
+{-| -}
+addStyleChar : List Style -> String -> String
 addStyleChar chars str =
     case chars of
         [] ->
@@ -522,6 +571,8 @@ addStyleChar chars str =
             addStyleChar remain (str ++ styleChar char)
 
 
+{-| -}
+styleTokens : Parser c Problem ( Style, List Style )
 styleTokens =
     Parser.succeed
         (\style following ->
@@ -660,6 +711,7 @@ styledTextLoop options context meaningful cursor =
         ]
 
 
+{-| -}
 endingWithEmptyLine : String -> TextCursor -> Bool
 endingWithEmptyLine new (TextCursor cursor) =
     if String.endsWith "\n" new && String.isEmpty (String.trim new) then
@@ -670,7 +722,7 @@ endingWithEmptyLine new (TextCursor cursor) =
     else
         False
 
-
+{-| -}
 parseInlineAttributes :
     { inlines : List (Block a)
     , replacements : List Replacement
@@ -733,7 +785,8 @@ parseInlineAttributes options ( cursor, selection ) =
             ]
         )
 
-
+{-| -}
+finalizeString : ParseContext -> String -> Parser c Problem ( String, Bool )
 finalizeString context str =
     Parser.oneOf
         [ Parser.succeed ( str, True )
@@ -782,6 +835,7 @@ finalizeString context str =
         ]
 
 
+{-| -}
 type TextChompResult
     = StopWith String
     | ContinueWith String
@@ -813,6 +867,7 @@ almostReplacement replacements existing =
     List.map captureChar ('1' :: allFirstChars)
 
 
+{-| -}
 textSelection : List Replacement -> TextCursor -> Parser Context Problem ( TextCursor, InlineSelection )
 textSelection replacements found =
     Parser.oneOf
@@ -840,6 +895,7 @@ textSelection replacements found =
         ]
 
 
+{-| -}
 simpleStyledTextTill :
     List Replacement
     -> TextCursor
@@ -890,6 +946,7 @@ simpleStyledTextTill replacements cursor =
         ]
 
 
+toText : TextDescription -> Maybe Text
 toText textDesc =
     case textDesc of
         Styled txt ->
@@ -960,6 +1017,7 @@ attrContainer (TextCursor cursor) recordBlocks =
 Allow styling to end if
 
 -}
+changeStyle : TextCursor -> ( Style, List Style ) -> TextCursor
 changeStyle ((TextCursor cursor) as full) ( styleToken, additional ) =
     let
         cursorText =
@@ -1000,7 +1058,8 @@ changeStyle ((TextCursor cursor) as full) ( styleToken, additional ) =
     else
         addText (addStyleChar (styleToken :: additional) "") full
 
-
+{-| -}
+stylingAllowed : { a | current : Text } -> Style -> Bool
 stylingAllowed cursor style =
     case cursor.current of
         Text styles txt ->
@@ -1027,10 +1086,14 @@ stylingAllowed cursor style =
                         String.endsWith " " txt
 
 
+{-| -}
+clearText : Text -> Text
 clearText (Text styles _) =
     Text styles ""
 
 
+{-| -}
+flipStyle : Style -> Text -> Text
 flipStyle newStyle textStyle =
     case textStyle of
         Text styles str ->
@@ -1045,6 +1108,8 @@ flipStyle newStyle textStyle =
                     Text { styles | strike = not styles.strike } str
 
 
+{-| -}
+flipStyles : List Style -> Text -> Text
 flipStyles styles textStyle =
     case styles of
         [] ->
@@ -1054,6 +1119,8 @@ flipStyles styles textStyle =
             flipStyles remain (flipStyle top textStyle)
 
 
+{-| -}
+advanceTo : Position -> TextCursor -> TextCursor
 advanceTo target (TextCursor cursor) =
     TextCursor
         { found = cursor.found
@@ -1064,10 +1131,14 @@ advanceTo target (TextCursor cursor) =
         }
 
 
+{-| -}
+getCurrentStyles : TextCursor -> Styling
 getCurrentStyles (TextCursor cursor) =
     getStyles cursor.current
 
 
+{-| -}
+getStyles : Text -> Styling
 getStyles (Text styles _) =
     styles
 
@@ -1273,11 +1344,14 @@ replacementStartingChars replacements =
 {- GENERAL HELPERS -}
 
 
+{-| -}
+withIndent : (Int -> Parser c x b) -> Parser c x b
 withIndent fn =
     Parser.getIndent
         |> Parser.andThen fn
 
 
+{-| -}
 withRangeResult :
     Parser Context Problem (Result err thing)
     ->
@@ -1320,7 +1394,7 @@ withRangeResult parser =
         |= parser
         |= getPosition
 
-
+{-| -}
 getRangeAndSource :
     Parser Context Problem thing
     ->
@@ -1378,6 +1452,7 @@ sliceRange range source =
         indented ++ snippet
 
 
+{-| -}
 withRange :
     Parser Context Problem thing
     -> Parser Context Problem ( Range, thing )
@@ -1395,12 +1470,14 @@ withRange parser =
         |= getPosition
 
 
+{-| -}
 word : Parser Context Problem String
 word =
     Parser.chompWhile Char.isAlphaNum
         |> Parser.getChompedString
 
 
+{-| -}
 getPosition : Parser c p Position
 getPosition =
     Parser.succeed
@@ -1468,12 +1545,7 @@ onlyAnnotation (Block details) =
 
 
 {-| -}
-
-
-
--- manyOf : Int -> List (Block a) ->
-
-
+manyOf : Int -> List (Block data) -> { a | found : List Description, seed : Seed, parsedSomething : Bool } -> Parser Context Problem (Parser.Step { parsedSomething : Bool, found : List Description, seed : Seed } (List Description))
 manyOf indentation blocks cursor =
     Parser.oneOf
         [ Parser.end End
@@ -1610,6 +1682,7 @@ type alias NestedIndex =
     }
 
 
+{-| -}
 peek : String -> Parser c p thing -> Parser c p thing
 peek name parser =
     Parser.succeed
@@ -1666,6 +1739,7 @@ type alias TreeCursor =
     }
 
 
+{-| -}
 type PreviouslyAdded
     = AddedContent
     | AddedItem
@@ -2211,11 +2285,13 @@ collapseAll end stack =
                     Nothing
 
 
+{-| -}
 type RecordType
     = InlineRecord
     | BlockRecord
 
 
+{-| -}
 record :
     RecordType
     -> Id
@@ -2282,6 +2358,8 @@ record recordType id failureId recordName expectations fields =
             )
 
 
+{-| -}
+backtrackCharacters : number -> { a | start : { b | offset : number, line : c, column : number }, end : d } -> { start : { offset : number, line : c, column : number }, end : d }
 backtrackCharacters chars range =
     { start =
         { offset = range.start.offset - chars
@@ -2305,7 +2383,8 @@ type Indented thing
     | WeirdIndent Int
     | EmptyLine
 
-
+{-| -}
+indentationString : Int -> String
 indentationString n =
     case n of
         0 ->
@@ -2677,6 +2756,7 @@ parseIndentation base previous =
             )
 
 
+{-| -}
 iconParser : Parser c Problem Icon
 iconParser =
     Parser.oneOf
@@ -2689,6 +2769,7 @@ iconParser =
         ]
 
 
+{-| -}
 skipBlankLineWith : thing -> Parser Context Problem thing
 skipBlankLineWith x =
     Parser.succeed x

@@ -11,7 +11,7 @@ module Mrk.Internal.Error exposing
 
 @docs Context, Problem, UnexpectedDetails, documentMismatch, renderParsingErrors, idNotFound
 
-@docs EditErr
+@docs EditErr, AstError, Rendered, compilerError, renderEditError
 
 -}
 
@@ -19,6 +19,7 @@ import Mrk.Internal.Format as Format
 import Parser.Advanced as Parser
 
 
+{-| -}
 type AstError
     = NoMatch
 
@@ -58,7 +59,7 @@ type Error
       -- Editing Errors
     | EditingError EditErr
 
-
+{-| -}
 type EditErr
     = IdNotFound
       -- i.e. trying to do a text edit on anything other than `text`
@@ -69,7 +70,8 @@ type EditErr
       -- first expectation is what we attempted to
     | DocumentDoesntAllow String (List String)
 
-
+{-| -}
+renderEditError : EditErr -> Rendered
 renderEditError editErr =
     case editErr of
         IdNotFound ->
@@ -88,6 +90,8 @@ renderEditError editErr =
             documentDoesntAllow new exp
 
 
+{-| -}
+idNotFound : Rendered
 idNotFound =
     Global
         { title = "ID NOT FOUND"
@@ -106,6 +110,7 @@ idNotFound =
     - insertAt/deleteAt edits on a non-manyOf
 
 -}
+invalidTextEdit : Rendered
 invalidTextEdit =
     Global
         { title = "INVALID TEXT EDIT"
@@ -139,6 +144,8 @@ invalidTextEdit =
         }
 
 
+{-| -}
+invalidInsert : Rendered
 invalidInsert =
     Global
         { title = "INVALID INSERT"
@@ -153,6 +160,8 @@ invalidInsert =
         }
 
 
+{-| -}
+invalidDelete : Rendered
 invalidDelete =
     Global
         { title = "INVALID DELETE"
@@ -167,6 +176,8 @@ invalidDelete =
         }
 
 
+{-| -}
+documentDoesntAllow : String -> List String -> Rendered
 documentDoesntAllow new expectations =
     Global
         { title = "DOCUMENT DOESN'T ALLOW"
@@ -192,6 +203,8 @@ documentDoesntAllow new expectations =
         }
 
 
+{-| -}
+indent : Format.Text
 indent =
     Format.text (String.repeat 4 " ")
 
@@ -228,6 +241,7 @@ type Problem
     | InvalidNumber
 
 
+{-| -}
 type alias ErrorMessage =
     { message : List Format.Text
     , region : { start : Position, end : Position }
@@ -275,6 +289,8 @@ type Rendered
         }
 
 
+{-| -}
+documentMismatch : Rendered
 documentMismatch =
     Global
         { title = "DOCUMENT MISMATCH"
@@ -292,6 +308,8 @@ documentMismatch =
         }
 
 
+{-| -}
+compilerError : Rendered
 compilerError =
     Global
         { title = "COMPILER ERROR"
@@ -351,6 +369,7 @@ renderParsingErrors source issues =
         }
 
 
+{-| -}
 render : String -> UnexpectedDetails -> Rendered
 render source current =
     case current.problem of
@@ -650,6 +669,8 @@ render source current =
                 }
 
 
+{-| -}
+styleChars : { italic : Bool, bold : Bool, strike : Bool } -> String
 styleChars styles =
     let
         italic =
@@ -687,6 +708,8 @@ styleChars styles =
             "~"
 
 
+{-| -}
+styleNames : { italic : Bool, bold : Bool, strike : Bool } -> String
 styleNames styles =
     let
         italic =
@@ -724,10 +747,12 @@ styleNames styles =
             "Strike formatting is"
 
 
+{-| -}
 type alias Similarity =
     Int
 
 
+{-| -}
 similarity : String -> String -> Similarity
 similarity source target =
     let
@@ -762,6 +787,7 @@ similarity source target =
     }
 
 -}
+renderParserIssue : List { a | problem : Problem } -> List Format.Text
 renderParserIssue deadends =
     List.concatMap
         (\dead ->
@@ -771,10 +797,14 @@ renderParserIssue deadends =
         deadends
 
 
+{-| -}
+addIndent : Int -> String -> String
 addIndent x str =
     String.repeat x " " ++ str
 
 
+{-| -}
+renderParsingProblem : Problem -> List Format.Text
 renderParsingProblem prob =
     case prob of
         ExpectingIndentation i ->
@@ -840,6 +870,8 @@ renderParsingProblem prob =
             [ Format.text "I ran into an invalid number." ]
 
 
+{-| -}
+hint : String -> List Format.Text
 hint str =
     [ Format.text "Hint"
         |> Format.underline
@@ -847,6 +879,8 @@ hint str =
     ]
 
 
+{-| -}
+highlight : { a | start : { b | line : Int, offset : Int, column : Int }, end : { c | line : Int, offset : Int, column : Int } } -> String -> List Format.Text
 highlight range source =
     if range.start.line == range.end.line then
         -- single line
@@ -902,6 +936,8 @@ highlight range source =
         List.concatMap highlightLine lines
 
 
+{-| -}
+highlightLine : ( Int, String ) -> List Format.Text
 highlightLine ( index, line ) =
     [ Format.text (String.fromInt index)
     , Format.red (Format.text ">")

@@ -5,7 +5,7 @@ module Mrk.Internal.Outcome exposing
 
 {-|
 
-@docs Outcome
+@docs Outcome, mapSuccess
 
 -}
 
@@ -17,6 +17,7 @@ type Outcome failure almost success
     | Failure failure
 
 
+{-| -}
 mapSuccess : (success -> otherSuccess) -> Outcome f a success -> Outcome f a otherSuccess
 mapSuccess fn outcome =
     case outcome of

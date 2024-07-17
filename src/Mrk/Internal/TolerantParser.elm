@@ -26,6 +26,7 @@ module Mrk.Internal.TolerantParser exposing
 import Parser.Advanced as Parser exposing ((|.), (|=))
 
 
+{-| -}
 type alias Parser context problem data =
     Parser.Parser context problem (Result (List problem) data)
 
@@ -126,24 +127,33 @@ ignore ignorePls keepPls =
 {- Basic Tokens -}
 
 
+{-| -}
 type OnError error
     = FastForwardTo (List Char)
     | Skip
     | StopWith error
 
 
+{-| -}
+fastForwardTo : List Char -> OnError error
 fastForwardTo =
     FastForwardTo
 
+
+{-| -}
+skip : OnError error
 
 skip =
     Skip
 
 
+{-| -}
+stopWith : a -> OnError a
 stopWith err =
     StopWith err
 
 
+{-| -}
 type alias Token problem =
     { match : String
     , problem : problem
@@ -169,6 +179,8 @@ symbol details =
     runToken details (Parser.symbol (Parser.Token details.match details.problem))
 
 
+{-| -}
+runToken : { a | onError : OnError error, problem : error } -> Parser.Parser c error value -> Parser.Parser c error (Result (List error) value)
 runToken details tokenParser =
     case details.onError of
         FastForwardTo skipTo ->
@@ -188,6 +200,7 @@ runToken details tokenParser =
                 ]
 
 
+{-| -}
 till : List Char -> problem -> Parser.Parser context problem ()
 till chars prob =
     Parser.succeed ()
@@ -198,10 +211,14 @@ till chars prob =
             ]
 
 
+{-| -}
+chompWhile : (Char -> Bool) -> Parser.Parser c x (Result error ())
 chompWhile while =
     Parser.succeed okUnit
         |. Parser.chompWhile while
 
 
+{-| -}
+okUnit : Result error ()
 okUnit =
     Ok ()

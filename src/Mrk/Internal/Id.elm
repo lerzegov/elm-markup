@@ -11,9 +11,11 @@ module Mrk.Internal.Id exposing
     , toString
     )
 
+{-| 
+@docs Id, Seed, dedent, fromString, indent, initialSeed, step, thread, threadThrough, toString
+-}
+
 {-| -}
-
-
 initialSeed : String -> Seed
 initialSeed doc =
     Seed doc [ 0 ]
@@ -51,17 +53,20 @@ type Seed
     = Seed String (List Int)
 
 
+{-| -}
 type Id
     = Id String (List Int)
 
-
+{-| -}
+toString : Id -> String
 toString (Id str ids) =
     ids
         |> List.map String.fromInt
         |> String.join "."
         |> (\x -> "m." ++ str ++ "." ++ x)
 
-
+{-| -}
+fromString : String -> Maybe Id
 fromString str =
     case String.split "." str of
         "m" :: docId :: remain ->
@@ -91,6 +96,7 @@ dedent num (Seed doc seed) =
     Seed doc (List.drop num seed)
 
 
+{-| -}
 step : Seed -> ( Id, Seed )
 step (Seed doc seed) =
     case seed of
@@ -101,12 +107,15 @@ step (Seed doc seed) =
             ( Id doc seed, Seed doc (current + 1 :: remain) )
 
 
+{-| -}
 thread : Seed -> List (Seed -> ( Seed, thing )) -> ( Seed, List thing )
 thread seed steps =
     List.foldl threadThrough ( seed, [] ) steps
         |> Tuple.mapSecond List.reverse
 
 
+{-| -}
+threadThrough : (a -> ( b, c )) -> ( a, List c ) -> ( b, List c )
 threadThrough current ( seed, past ) =
     let
         ( newSeed, result ) =

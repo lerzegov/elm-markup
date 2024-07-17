@@ -10,10 +10,13 @@
         "Mrk.New",
         "Mrk.Error",
         "Mrk.Internal.Description",
-        "Mrk.Internal.Edit",
-        "Mrk.Internal.New",
+        "Mrk.Internal.Error",
+        "Mrk.Internal.Format",
+        "Mrk.Internal.Id",
+        "Mrk.Internal.Index",
+        "Mrk.Internal.Outcome",
         "Mrk.Internal.Parser",
-        "Mrk.Internal.Id"
+        "Mrk.Internal.TolerantParser"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
